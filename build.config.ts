@@ -13,6 +13,11 @@ export default defineBuildConfig({
       input: './src/',
       format: 'cjs',
       ext: 'js'
+    },
+    {
+      input: './src/',
+      format: 'cjs',
+      ext: 'js'
     }
   ]
 })

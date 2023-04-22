@@ -1,1 +1,2 @@
-export function  test () {}
+export { SocketConnect } from './socket';
+export { type SocketConnectOptions, SocketConnectState } from './socket-options';
