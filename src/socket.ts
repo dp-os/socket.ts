@@ -9,10 +9,7 @@ enum UserState {
 
 export class SocketConnect<T extends {} = MessageEvent> {
     public options: SocketConnectOptions = {
-        url: '',
-        createSocket(url, protocols) {
-            return new WebSocket(url, protocols)
-        },
+        url: ''
     }
     public state: SocketConnectState = SocketConnectState.stateless;
     private _socket: SocketConnectInstance | null = null
@@ -95,14 +92,13 @@ export class SocketConnect<T extends {} = MessageEvent> {
         }
 
         this._updateState(SocketConnectState.pending);
-        await this._fetchOptions();
-
-        const { url, protocols, createSocket } = this.options;
+        await this._getAsyncOptions();
 
         if (this._userState === UserState.disconnect) {
-            this._updateState(SocketConnectState.close);
             return;
         }
+        const { url, protocols, createSocket = createWebSocket } = this.options;
+
         const socket = createSocket(url, protocols);
 
         const dispose = () => {
@@ -131,7 +127,7 @@ export class SocketConnect<T extends {} = MessageEvent> {
         }
         this._socket = socket;
     }
-    private async _fetchOptions() {
+    private async _getAsyncOptions() {
         const { _asyncOptions } = this;
         if (_asyncOptions) {
             const options = await _asyncOptions();
@@ -144,4 +140,8 @@ export class SocketConnect<T extends {} = MessageEvent> {
         this.state = state;
         this._stateEvent.dispatchEvent(state);
     }
+}
+
+function createWebSocket(url: string, protocols?: string | string[]): SocketConnectInstance {
+    return new WebSocket(url, protocols)
 }

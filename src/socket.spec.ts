@@ -91,9 +91,48 @@ test('createSocket', async () => {
 
     socket.dispose();
 
-    assert.equal(socket.state, SocketConnectState.close); 
+    assert.equal(socket.state, SocketConnectState.close);
     assert.deepEqual(testDataArr, ['{"value":"stateless"}', '{"value":"open"}']);
     assert.equal(testUrl, '/test');
     assert.equal(testProtocols, '123');
     assert.deepEqual(stateArr, [SocketConnectState.pending, SocketConnectState.open, SocketConnectState.close, SocketConnectState.pending, SocketConnectState.error, SocketConnectState.close])
 })
+
+test('onmessage', async () => {
+    const socketMock: SocketConnectInstance = {
+        onclose: null,
+        onerror: null,
+        onmessage: null,
+        onopen: null,
+        send() {
+        },
+        close() {
+            socketMock.onclose && socketMock.onclose({});
+        },
+    }
+    const socket = new SocketConnect({
+        url: '',
+        createSocket() {
+            return socketMock
+        },
+    });
+    setTimeout(() => {
+        socketMock.onopen && socketMock.onopen({});
+    }, 100)
+    await socket.connect();
+    const dataArr: any[] = [];
+    socket.subscribeMessage((data) => {
+        dataArr.push(data);
+    })
+    socketMock.onmessage && socketMock.onmessage({ value: 1 })
+    socketMock.onmessage && socketMock.onmessage({ value: 2 })
+
+    assert.deepEqual(dataArr, [
+        {
+            value: 1
+        },
+        {
+            value: 2
+        }
+    ])
+});

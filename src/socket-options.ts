@@ -11,7 +11,7 @@ export interface SocketConnectInstance {
 export interface SocketConnectOptions {
     url: string;
     protocols?: string | string[];
-    createSocket: (url: string, protocols?: string | string[]) => SocketConnectInstance;
+    createSocket?: (url: string, protocols?: string | string[]) => SocketConnectInstance;
 }
 
 export type SocketConnectAsyncOptions = (() => Promise<Partial<SocketConnectOptions>>);
