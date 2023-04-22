@@ -130,3 +130,4 @@ dist
 .pnp.*
 docs/.vitepress/cache
 coverage
+.DS_Store

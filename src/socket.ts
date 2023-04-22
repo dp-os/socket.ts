@@ -24,7 +24,6 @@ export class SocketConnect<T extends {} = MessageEvent> {
         } else {
             Object.assign(this.options, options);
         }
-        Object.assign(this.options, options);
     }
     public async connect(): Promise<boolean> {
         this._userState = UserState.connect;
@@ -131,7 +130,7 @@ export class SocketConnect<T extends {} = MessageEvent> {
         const { _asyncOptions } = this;
         if (_asyncOptions) {
             const options = await _asyncOptions();
-            Object.assign(options, this.options);
+            Object.assign(this.options, options);
         }
     }
     private _updateState(state: SocketConnectState) {
