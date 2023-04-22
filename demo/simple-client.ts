@@ -47,7 +47,7 @@ function initTime() {
 
     socket.subscribeMessage((ev) => {
         const result = JSON.parse(ev.data);
-        if (result.type === 'custom') {
+        if (result.event === 'server-time') {
             timeEl.innerText = result.data.date;
         }
     });
