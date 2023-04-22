@@ -1,6 +1,6 @@
 import { SocketOptions, SocketState, SocketConnectInstance, SocketAsyncOptions } from './socket-options';
 import { CustomEvent } from './custom-event';
-import { retryPlugin } from '../plugins';
+import { retryPlugin, heartbeatPlugin } from '../plugins';
 
 enum UserState {
     connect,
@@ -11,7 +11,8 @@ enum UserState {
 export class Socket<Send extends {} = any, Message extends {} = any> {
     public options: SocketOptions = {
         url: '',
-        retryTime: 3000
+        retryInterval: 3000,
+        heartbeatInterval: 1000 * 60
     }
     public state: SocketState = SocketState.stateless;
     private _socket: SocketConnectInstance | null = null
@@ -27,6 +28,7 @@ export class Socket<Send extends {} = any, Message extends {} = any> {
             Object.assign(this.options, options);
         }
         retryPlugin(this);
+        heartbeatPlugin(this);
     }
     public async connect(): Promise<boolean> {
         this._userState = UserState.connect;

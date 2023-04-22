@@ -23,7 +23,7 @@ export function retryPlugin(socket: Socket) {
             timer = setTimeout(() => {
                 timer = null;
                 connect();
-            }, socket.options.retryTime || 3000)
+            }, socket.options.retryInterval || 3000)
         }
     }
 

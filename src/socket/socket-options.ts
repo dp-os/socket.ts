@@ -14,7 +14,9 @@ export type SocketPlugin = (socket: Socket) => void;
 export interface SocketOptions {
     url: string;
     protocols?: string | string[];
-    retryTime?: number;
+    retryInterval?: number;
+    heartbeatInterval?: number;
+    heartbeatData?: any;
     createSocket?: (url: string, protocols?: string | string[]) => SocketConnectInstance;
     plugins?: SocketPlugin[]
 }
