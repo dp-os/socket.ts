@@ -1,6 +1,6 @@
-import { SocketConnect, SocketConnectState } from '../src';
+import { Socket, SocketState } from '../../src';
 
-const socket = new SocketConnect({
+const socket = new Socket({
     url: 'ws://localhost:5173',
     protocols: 'vite-hmr'
 })
@@ -22,19 +22,19 @@ function initState() {
     socket.subscribeState((state) => {
         let text = '';
         switch (state) {
-            case SocketConnectState.stateless:
+            case SocketState.stateless:
                 text = 'Not connected';
                 break;
-            case SocketConnectState.pending:
+            case SocketState.pending:
                 text = 'Connecting';
                 break;
-            case SocketConnectState.open:
+            case SocketState.open:
                 text = 'Successfully connected';
                 break;
-            case SocketConnectState.close:
+            case SocketState.close:
                 text = 'Connection closed';
                 break;
-            case SocketConnectState.error:
+            case SocketState.error:
                 text = 'Connection error';
                 break;
         }
@@ -57,14 +57,14 @@ export function initSubscribe() {
     const unsubscribe = document.getElementById('unsubscribe')!;
 
     subscribeEl.onclick = () => {
-        socket.sendJson({
+        socket.send({
             type: 'custom',
             event: 'server-time',
             data: true
         })
     }
     unsubscribe.onclick = () => {
-        socket.sendJson({
+        socket.send({
             type: 'custom',
             event: 'server-time',
             data: false

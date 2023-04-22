@@ -1,22 +1,27 @@
-export type SocketConnectSendData = string | ArrayBufferLike | Blob | ArrayBufferView;
+import { type Socket } from './socket';
+
 export interface SocketConnectInstance {
     onmessage: ((event: any) => void) | null;
     onopen: ((event: any) => void) | null;
     onclose: ((event: any) => void) | null;
     onerror: ((event: any) => void) | null;
     close: (code?: number, reason?: string) => void
-    send(data: SocketConnectSendData): void;
+    send(data: any): void;
 }
 
-export interface SocketConnectOptions {
+export type SocketPlugin = (socket: Socket) => void;
+
+export interface SocketOptions {
     url: string;
     protocols?: string | string[];
+    retryTime?: number;
     createSocket?: (url: string, protocols?: string | string[]) => SocketConnectInstance;
+    plugins?: SocketPlugin[]
 }
 
-export type SocketConnectAsyncOptions = (() => Promise<Partial<SocketConnectOptions>>);
+export type SocketAsyncOptions = (() => Promise<Partial<SocketOptions>>);
 
-export enum SocketConnectState {
+export enum SocketState {
     stateless = 'stateless',
     pending = 'pending',
     open = 'open',

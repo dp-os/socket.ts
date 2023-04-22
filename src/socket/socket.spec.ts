@@ -1,12 +1,12 @@
-import { SocketConnect, } from './socket';
-import { SocketConnectState, SocketConnectInstance } from './socket-options';
+import { Socket, } from './socket';
+import { SocketState, SocketConnectInstance } from './socket-options';
 import { test, assert } from 'vitest'
 
 test('createSocket', async () => {
     let testUrl = '';
     let testProtocols: string | string[] | undefined = '';
     const testDataArr: any[] = [];
-    const stateArr: SocketConnectState[] = [];
+    const stateArr: SocketState[] = [];
     const socketMock: SocketConnectInstance = {
         onclose: null,
         onerror: null,
@@ -19,7 +19,7 @@ test('createSocket', async () => {
             socketMock.onclose && socketMock.onclose({});
         },
     }
-    const socket = new SocketConnect({
+    const socket = new Socket({
         url: '/test',
         protocols: '123',
         createSocket(url, protocols) {
@@ -30,7 +30,7 @@ test('createSocket', async () => {
         },
     });
 
-    socket.sendJson({ value: 'stateless' });
+    socket.send({ value: 'stateless' });
 
     setTimeout(() => {
         socketMock.onopen && socketMock.onopen({});
@@ -40,62 +40,62 @@ test('createSocket', async () => {
         stateArr.push(state);
     });
 
-    assert.equal(socket.state, SocketConnectState.stateless);
+    assert.equal(socket.state, SocketState.stateless);
     assert.deepEqual(testDataArr, []);
 
     // Successfully connected
     let ok = await socket.connect();
 
-    socket.sendJson({ value: 'open' });
+    socket.send({ value: 'open' });
 
     assert.isTrue(true);
-    assert.equal(socket.state, SocketConnectState.open);
+    assert.equal(socket.state, SocketState.open);
     assert.deepEqual(testDataArr, ['{"value":"stateless"}', '{"value":"open"}']);
     assert.isTrue(ok);
     assert.equal(testUrl, '/test');
     assert.equal(testProtocols, '123');
-    assert.deepEqual(stateArr, [SocketConnectState.pending, SocketConnectState.open])
+    assert.deepEqual(stateArr, [SocketState.pending, SocketState.open])
 
     // Call again in connected state
     ok = await socket.connect();
 
     assert.isTrue(true);
-    assert.equal(socket.state, SocketConnectState.open);
+    assert.equal(socket.state, SocketState.open);
     assert.deepEqual(testDataArr, ['{"value":"stateless"}', '{"value":"open"}']);
     assert.isTrue(ok);
     assert.equal(testUrl, '/test');
     assert.equal(testProtocols, '123');
-    assert.deepEqual(stateArr, [SocketConnectState.pending, SocketConnectState.open])
+    assert.deepEqual(stateArr, [SocketState.pending, SocketState.open])
 
     socket.disconnect();
-    assert.equal(socket.state, SocketConnectState.close);
+    assert.equal(socket.state, SocketState.close);
     assert.deepEqual(testDataArr, ['{"value":"stateless"}', '{"value":"open"}']);
     assert.isTrue(ok);
     assert.equal(testUrl, '/test');
     assert.equal(testProtocols, '123');
-    assert.deepEqual(stateArr, [SocketConnectState.pending, SocketConnectState.open, SocketConnectState.close])
+    assert.deepEqual(stateArr, [SocketState.pending, SocketState.open, SocketState.close])
 
 
-    socket.sendJson({ value: 'disconnect' });
+    socket.send({ value: 'disconnect' });
     setTimeout(() => {
         socketMock.onerror && socketMock.onerror({});
     }, 100)
     ok = await socket.connect();
     assert.isTrue(true);
-    assert.equal(socket.state, SocketConnectState.error);
+    assert.equal(socket.state, SocketState.error);
     assert.deepEqual(testDataArr, ['{"value":"stateless"}', '{"value":"open"}']);
     assert.isFalse(ok);
     assert.equal(testUrl, '/test');
     assert.equal(testProtocols, '123');
-    assert.deepEqual(stateArr, [SocketConnectState.pending, SocketConnectState.open, SocketConnectState.close, SocketConnectState.pending, SocketConnectState.error])
+    assert.deepEqual(stateArr, [SocketState.pending, SocketState.open, SocketState.close, SocketState.pending, SocketState.error])
 
     socket.dispose();
 
-    assert.equal(socket.state, SocketConnectState.close);
+    assert.equal(socket.state, SocketState.stateless);
     assert.deepEqual(testDataArr, ['{"value":"stateless"}', '{"value":"open"}']);
     assert.equal(testUrl, '/test');
     assert.equal(testProtocols, '123');
-    assert.deepEqual(stateArr, [SocketConnectState.pending, SocketConnectState.open, SocketConnectState.close, SocketConnectState.pending, SocketConnectState.error, SocketConnectState.close])
+    assert.deepEqual(stateArr, [SocketState.pending, SocketState.open, SocketState.close, SocketState.pending, SocketState.error, SocketState.stateless])
 })
 
 test('onmessage', async () => {
@@ -109,7 +109,7 @@ test('onmessage', async () => {
             socketMock.onclose && socketMock.onclose({});
         },
     }
-    const socket = new SocketConnect({
+    const socket = new Socket({
         url: '',
         createSocket() {
             return socketMock
@@ -152,7 +152,7 @@ test('asyncOptions', async () => {
     }
     let testUrl = '';
     let testProtocols: any = [];
-    const socket = new SocketConnect(async () => {
+    const socket = new Socket(async () => {
         return new Promise((resolve) => {
             setTimeout(() => {
                 resolve({
