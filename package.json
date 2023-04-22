@@ -15,13 +15,14 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && unbuild",
-    "test": "pnpm run build:packages && vitest",
-    "coverage": "pnpm run build:packages && vitest run --coverage"
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@vitest/coverage-c8": "0.30.1",
     "dayjs": "^1.11.7",
     "vite": "^4.3.1",
     "vitest": "^0.30.1",

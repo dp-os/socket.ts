@@ -1,4 +1,4 @@
-import { SocketConnectOptions, SocketConnectState, SocketConnectInstance, SocketConnectSendData } from './socket-options';
+import { SocketConnectOptions, SocketConnectState, SocketConnectInstance, SocketConnectSendData, SocketConnectAsyncOptions } from './socket-options';
 import { CustomEvent } from './custom-event';
 
 enum UserState {
@@ -19,30 +19,48 @@ export class SocketConnect<T extends {} = MessageEvent> {
     private _userState: UserState = UserState.connect;
     private _stateEvent = new CustomEvent<SocketConnectState>()
     private _messageEvent = new CustomEvent<T>();
-    public constructor(options: Partial<SocketConnectOptions>) {
-        this.setOptions(options)
-    }
-    public setOptions(options: Partial<SocketConnectOptions>) {
+    private _asyncOptions: SocketConnectAsyncOptions | null = null;
+    private _sendData: any[] = [];
+    public constructor(options: Partial<SocketConnectOptions> | SocketConnectAsyncOptions) {
+        if (typeof options === 'function') {
+            this._asyncOptions = options;
+        } else {
+            Object.assign(this.options, options);
+        }
         Object.assign(this.options, options);
-        return this;
     }
-    public connect() {
+    public async connect(): Promise<boolean> {
         this._userState = UserState.connect;
         this._connect();
-        return this;
+        if (this.state === SocketConnectState.open) {
+            return true;
+        }
+        return new Promise<boolean>((resolve) => {
+            const un = this.subscribeState((state) => {
+                un();
+                switch (state) {
+                    case SocketConnectState.open:
+                        resolve(true);
+                        break;
+                    case SocketConnectState.error:
+                        resolve(false);
+                        break;
+                }
+            });
+        })
     }
 
-    public disconnect() {
+    public disconnect(): void {
         this._userState = UserState.disconnect;
-        this._updateState(SocketConnectState.close);
         if (this._socket) {
             this._socket.close();
             this._socket = null;
         }
-        return this;
     }
-    public dispose() {
+    public dispose(): void {
         this.disconnect();
+        this._updateState(SocketConnectState.close);
+        this._sendData.length = 0
         this._stateEvent.destroy();
         this._messageEvent.destroy();
     }
@@ -59,11 +77,12 @@ export class SocketConnect<T extends {} = MessageEvent> {
         }
     }
     public send(data: SocketConnectSendData): boolean {
-        const { state, _socket } = this;
+        const { state, _socket, _sendData } = this;
         if (_socket && state === SocketConnectState.open) {
             _socket.send(data);
             return true;
         }
+        _sendData.push(data);
         return false
     }
     public sendJson(data: Record<string, any>): boolean {
@@ -71,7 +90,7 @@ export class SocketConnect<T extends {} = MessageEvent> {
     }
     private async _connect() {
 
-        if (this.state === SocketConnectState.pending) {
+        if (this.state === SocketConnectState.pending || this.state === SocketConnectState.open) {
             return;
         }
 
@@ -86,31 +105,37 @@ export class SocketConnect<T extends {} = MessageEvent> {
         }
         const socket = createSocket(url, protocols);
 
+        const dispose = () => {
+            socket.onopen = null;
+            socket.onmessage = null;
+            socket.onclose = null;
+            socket.onerror = null;
+        }
         socket.onmessage = (ev) => {
             this._messageEvent.dispatchEvent(ev);
         }
         socket.onopen = () => {
             this._updateState(SocketConnectState.open);
+            this._sendData.forEach(data => {
+                this.send(data);
+            })
+            this._sendData.length = 0
         }
         socket.onclose = () => {
-            socket.onopen = null;
-            socket.onclose = null;
-            socket.onerror = null;
             this._updateState(SocketConnectState.close);
+            dispose();
         }
         socket.onerror = () => {
-            socket.onopen = null;
-            socket.onclose = null;
-            socket.onerror = null;
             this._updateState(SocketConnectState.error);
+            dispose();
         }
         this._socket = socket;
     }
     private async _fetchOptions() {
-        const { fetchOptions } = this.options;
-        if (fetchOptions) {
-            const options = await fetchOptions();
-            this.setOptions(options)
+        const { _asyncOptions } = this;
+        if (_asyncOptions) {
+            const options = await _asyncOptions();
+            Object.assign(options, this.options);
         }
     }
     private _updateState(state: SocketConnectState) {

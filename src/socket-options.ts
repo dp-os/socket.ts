@@ -12,13 +12,14 @@ export interface SocketConnectOptions {
     url: string;
     protocols?: string | string[];
     createSocket: (url: string, protocols?: string | string[]) => SocketConnectInstance;
-    fetchOptions?: () => Promise<Partial<SocketConnectOptions>>;
 }
 
+export type SocketConnectAsyncOptions = (() => Promise<Partial<SocketConnectOptions>>);
+
 export enum SocketConnectState {
-    stateless,
-    pending,
-    open,
-    error,
-    close
+    stateless = 'stateless',
+    pending = 'pending',
+    open = 'open',
+    error = 'error',
+    close = 'close'
 }
