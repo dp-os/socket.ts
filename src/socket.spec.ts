@@ -5,7 +5,7 @@ import { test, assert } from 'vitest'
 test('createSocket', async () => {
     let testUrl = '';
     let testProtocols: string | string[] | undefined = '';
-    let testDataArr: any[] = [];
+    const testDataArr: any[] = [];
     const stateArr: SocketConnectState[] = [];
     const socketMock: SocketConnectInstance = {
         onclose: null,
@@ -104,9 +104,8 @@ test('onmessage', async () => {
         onerror: null,
         onmessage: null,
         onopen: null,
-        send() {
-        },
-        close() {
+        send() {}, 
+        close() { 
             socketMock.onclose && socketMock.onclose({});
         },
     }

@@ -76,6 +76,3 @@ initConnect();
 initState();
 initTime();
 initSubscribe()
-
-
-
