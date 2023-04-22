@@ -15,8 +15,8 @@ export interface SocketOptions {
     url: string;
     protocols?: string | string[];
     retryInterval?: number;
-    heartbeatInterval?: number;
-    heartbeatData?: any;
+    pingInterval?: number;
+    pingData?: any;
     createSocket?: (url: string, protocols?: string | string[]) => SocketConnectInstance;
     plugins?: SocketPlugin[]
 }

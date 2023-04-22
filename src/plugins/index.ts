@@ -1,2 +1,2 @@
 export * from './retry';
-export * from './heartbeat';
+export * from './ping';
