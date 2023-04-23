@@ -1,6 +1,6 @@
 {
-  "name": "socket-connect",
-  "version": "1.0.0",
+  "name": "socket.ts",
+  "version": "0.0.2",
   "description": "",
   "type": "module",
   "main": "./dist/index.mjs",
@@ -17,11 +17,12 @@
     "build": "tsc --noEmit && unbuild",
     "lint": "eslint . --fix",
     "test": "vitest",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "release": "./release.sh"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "happy-dom": "^9.9.2",
     "@typescript-eslint/eslint-plugin": "^5.59.0",

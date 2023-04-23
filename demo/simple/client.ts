@@ -4,7 +4,7 @@ import { EVENT_NAME } from './config';
 const socket = new Socket({
     url: 'ws://localhost:5173',
     protocols: 'vite-hmr'
-})
+});
 
 function initConnect() {
     const connectEl = document.getElementById('connect')!;
