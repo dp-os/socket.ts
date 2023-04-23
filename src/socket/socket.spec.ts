@@ -23,7 +23,7 @@ test('createBridge', async () => {
         url: '/test',
         protocols: '123',
         createBridge(socket) {
-            testUrl = socket.options.url;
+            testUrl = socket.options.url || '';
             testProtocols = socket.options.protocols;
             return socketMock
         },
@@ -158,7 +158,7 @@ test('asyncOptions', async () => {
                     url: '/test',
                     protocols: ['1', '2'],
                     createBridge(socket) {
-                        testUrl = socket.options.url;
+                        testUrl = socket.options.url || '';
                         testProtocols = socket.options.protocols;
                         return socketMock;
                     },
