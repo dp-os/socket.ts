@@ -12,10 +12,10 @@ enum UserState {
 export class Socket<Send extends {} = any, MessageData extends {} = any> {
     public options: SocketOptions = {
         url: '',
-        retryInterval: 3000,
+        retryInterval: 1000 * 30,
         pingInterval: 1000 * 60,
         createBridge(socket) {
-            return new WebSocketBridge(socket.options.url, socket.options.protocols)
+            return new WebSocketBridge(socket.options.url || '', socket.options.protocols)
         }
     }
     public state: SocketState = SocketState.stateless;

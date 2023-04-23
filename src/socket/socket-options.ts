@@ -11,15 +11,7 @@ export interface SocketBridge {
 
 export type SocketPlugin = (socket: Socket) => void;
 
-export interface SocketOptions {
-    url: string;
-    protocols?: string | string[];
-    retryInterval?: number;
-    pingInterval?: number;
-    pingData?: any;
-    createBridge: (socket: Socket) => SocketBridge;
-    plugins?: SocketPlugin[]
-}
+
 
 export type SocketAsyncOptions = (() => Promise<Partial<Omit<SocketOptions, 'plugins'>>>);
 
@@ -29,4 +21,35 @@ export enum SocketState {
     open = 'open',
     error = 'error',
     close = 'close'
+}export interface SocketOptions {
+    /**
+     * The URL of the Socket request.
+     */
+    url?: string;
+    /**
+     * The protocol of the Socket request.
+     */
+    protocols?: string | string[];
+    /**
+     * The interval between reconnection attempts after the connection is lost, in milliseconds. Default is: 1000 * 30.
+     */
+    retryInterval?: number;
+    /**
+     * The interval between sending heartbeats, in milliseconds. Default is: 1000 * 60.
+     */
+    pingInterval?: number;
+    /**
+     * The data to be sent with the heartbeat.
+     */
+    pingData?: any;
+    /**
+     * Create a bridge. The default bridge is WorkerSocketBridge.
+     * @param socket The current Socket instance.
+     * @returns 
+     */
+    createBridge: (socket: Socket) => SocketBridge;
+    /**
+     * The plugins used.
+     */
+    plugins?: SocketPlugin[]
 }
