@@ -1,9 +1,22 @@
-import { Socket, SocketState } from '../../src';
-import { EVENT_NAME } from './config';
+import { Socket, SocketState, visiblePlugin } from '../../src';
 
 const socket = new Socket({
     url: 'ws://localhost:5173',
-    protocols: 'vite-hmr'
+    protocols: 'vite-hmr',
+    plugins: [
+        visiblePlugin({
+            visible: (socket) => {
+                socket.send({
+                    type: 'visible',
+                })
+            },
+            invisible: (socket) => {
+                socket.send({
+                    type: 'invisible',
+                })
+            },
+        })
+    ]
 })
 
 function initConnect() {
@@ -42,38 +55,5 @@ function initState() {
         stateEl.innerText = text;
     })
 }
-
-function initTime() {
-    const timeEl = document.getElementById('time')!;
-
-    socket.subscribeMessage((ev) => {
-        const result = JSON.parse(ev.data);
-        if (result.event === EVENT_NAME) {
-            timeEl.innerText = result.data.date;
-        }
-    });
-}
-function initSubscribe() {
-    const subscribeEl = document.getElementById('subscribe')!;
-    const unsubscribe = document.getElementById('unsubscribe')!;
-
-    subscribeEl.onclick = () => {
-        socket.send({
-            type: 'custom',
-            event: EVENT_NAME,
-            data: true
-        })
-    }
-    unsubscribe.onclick = () => {
-        socket.send({
-            type: 'custom',
-            event: EVENT_NAME,
-            data: false
-        })
-    }
-
-}
 initConnect();
 initState();
-initTime();
-initSubscribe()

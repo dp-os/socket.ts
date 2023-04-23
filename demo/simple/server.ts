@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import { Plugin, WebSocket } from 'vite';
+import { EVENT_NAME } from './config';
 
 export const simplePlugin: Plugin = {
     name: 'socket-simple',
@@ -12,7 +13,6 @@ export const simplePlugin: Plugin = {
 
 function serverTime(client: WebSocket) {
     let timer: NodeJS.Timer | null = null;
-    const EVENT = 'server-time';
     const unsubscribe = () => {
         if (timer) {
             clearInterval(timer);
@@ -21,7 +21,7 @@ function serverTime(client: WebSocket) {
     }
     const send = () => {
         const date = dayjs().format('YYYY-MM-DD HH:mm:ss');
-        client.send(JSON.stringify({ event: EVENT, data: { date } }));
+        client.send(JSON.stringify({ event: EVENT_NAME, data: { date } }));
     }
     const subscribe = (subscribe: boolean) => {
         if (subscribe) {
@@ -37,7 +37,7 @@ function serverTime(client: WebSocket) {
     });
     client.on('message', (ev) => {
         const result = JSON.parse(ev.toString());
-        if (result.event === EVENT) {
+        if (result.event === EVENT_NAME) {
             subscribe(result.data);
         }
     })
