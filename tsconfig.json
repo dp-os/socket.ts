@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+      "lib": ["WebWorker", "DOM"],
       "target": "ESNext",
       "module": "esnext",
       "importHelpers": true,

@@ -17,7 +17,7 @@ export interface SocketOptions {
     retryInterval?: number;
     pingInterval?: number;
     pingData?: any;
-    createSocket: (socket: Socket) => SocketBridge;
+    createBridge: (socket: Socket) => SocketBridge;
     plugins?: SocketPlugin[]
 }
 

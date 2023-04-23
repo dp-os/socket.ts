@@ -2,7 +2,7 @@ import { Socket, } from './socket';
 import { SocketState, SocketBridge } from './socket-options';
 import { test, assert } from 'vitest'
 
-test('createSocket', async () => {
+test('createBridge', async () => {
     let testUrl = '';
     let testProtocols: string | string[] | undefined = '';
     const testDataArr: any[] = [];
@@ -22,7 +22,7 @@ test('createSocket', async () => {
     const socket = new Socket({
         url: '/test',
         protocols: '123',
-        createSocket(socket) {
+        createBridge(socket) {
             testUrl = socket.options.url;
             testProtocols = socket.options.protocols;
             return socketMock
@@ -110,7 +110,7 @@ test('onMessage', async () => {
     }
     const socket = new Socket({
         url: '',
-        createSocket() {
+        createBridge() {
             return socketMock
         },
     });
@@ -157,7 +157,7 @@ test('asyncOptions', async () => {
                 resolve({
                     url: '/test',
                     protocols: ['1', '2'],
-                    createSocket(socket) {
+                    createBridge(socket) {
                         testUrl = socket.options.url;
                         testProtocols = socket.options.protocols;
                         return socketMock;

@@ -1,6 +1,6 @@
 import { SocketState, type SocketBridge } from '../socket';
 
-export class WorkerSocket implements SocketBridge {
+export class WorkerSocketBridge implements SocketBridge {
     private _worker: Worker;
     public constructor (worker: Worker) {
         this._worker = worker;

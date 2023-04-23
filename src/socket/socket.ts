@@ -1,6 +1,6 @@
 import { SocketOptions, SocketState, SocketBridge, SocketAsyncOptions } from './socket-options';
 import { CustomEvent } from './custom-event';
-import { retryPlugin, pingPlugin } from '../plugins';
+import { retryPlugin, pingPlugin, workerPlugin } from '../plugins';
 import { WebSocketBridge } from '../bridge/web-socket'
 
 enum UserState {
@@ -14,7 +14,7 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
         url: '',
         retryInterval: 3000,
         pingInterval: 1000 * 5,
-        createSocket(socket) {
+        createBridge(socket) {
             return new WebSocketBridge(socket.options.url, socket.options.protocols)
         },
     }
@@ -33,6 +33,7 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
         }
         retryPlugin(this);
         pingPlugin(this);
+        workerPlugin(this);
     }
     public async connect(): Promise<boolean> {
         this._userState = UserState.connect;
@@ -108,9 +109,9 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
         if (this._userState === UserState.disconnect) {
             return;
         }
-        const {  createSocket } = this.options;
+        const {  createBridge } = this.options;
 
-        const socket = createSocket(this);
+        const socket = createBridge(this);
 
         const dispose = () => {
             socket.onOpen = null;
