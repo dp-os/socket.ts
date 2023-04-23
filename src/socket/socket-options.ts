@@ -21,7 +21,7 @@ export interface SocketOptions {
     plugins?: SocketPlugin[]
 }
 
-export type SocketAsyncOptions = (() => Promise<Partial<SocketOptions>>);
+export type SocketAsyncOptions = (() => Promise<Partial<Omit<SocketOptions, 'plugins'>>>);
 
 export enum SocketState {
     stateless = 'stateless',

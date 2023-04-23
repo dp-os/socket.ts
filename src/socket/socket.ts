@@ -13,10 +13,10 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
     public options: SocketOptions = {
         url: '',
         retryInterval: 3000,
-        pingInterval: 1000 * 5,
+        pingInterval: 1000 * 60,
         createBridge(socket) {
             return new WebSocketBridge(socket.options.url, socket.options.protocols)
-        },
+        }
     }
     public state: SocketState = SocketState.stateless;
     private _socket: SocketBridge | null = null
@@ -31,9 +31,13 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
         } else {
             Object.assign(this.options, options);
         }
+        const plugins = this.options.plugins || [];
         retryPlugin(this);
         pingPlugin(this);
         workerPlugin(this);
+        plugins.forEach(plugin => {
+            plugin(this);
+        })
     }
     public async connect(): Promise<boolean> {
         this._userState = UserState.connect;

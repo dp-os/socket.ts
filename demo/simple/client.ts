@@ -1,8 +1,22 @@
-import { Socket, SocketState } from '../../src';
+import { Socket, SocketState, visiblePlugin } from '../../src';
 
 const socket = new Socket({
     url: 'ws://localhost:5173',
-    protocols: 'vite-hmr'
+    protocols: 'vite-hmr',
+    plugins: [
+        visiblePlugin({
+            visible: (socket) => {
+                socket.send({
+                    type: 'visible',
+                })
+            },
+            invisible: (socket) => {
+                socket.send({
+                    type: 'invisible',
+                })
+            },
+        })
+    ]
 })
 
 function initConnect() {
@@ -53,7 +67,7 @@ function initTime() {
     });
 }
 export function initSubscribe() {
-    const subscribeEl =document.getElementById('subscribe')!;
+    const subscribeEl = document.getElementById('subscribe')!;
     const unsubscribe = document.getElementById('unsubscribe')!;
 
     subscribeEl.onclick = () => {
