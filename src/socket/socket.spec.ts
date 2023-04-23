@@ -1,5 +1,5 @@
 import { Socket, } from './socket';
-import { SocketState, SocketConnectInstance } from './socket-options';
+import { SocketState, SocketBridge } from './socket-options';
 import { test, assert } from 'vitest'
 
 test('createSocket', async () => {
@@ -7,25 +7,24 @@ test('createSocket', async () => {
     let testProtocols: string | string[] | undefined = '';
     const testDataArr: any[] = [];
     const stateArr: SocketState[] = [];
-    const socketMock: SocketConnectInstance = {
-        onclose: null,
-        onerror: null,
-        onmessage: null,
-        onopen: null,
+    const socketMock: SocketBridge = {
+        onClose: null,
+        onError: null,
+        onMessage: null,
+        onOpen: null,
         send(data) {
             testDataArr.push(data);
         },
         close() {
-            socketMock.onclose && socketMock.onclose({});
+            socketMock.onClose && socketMock.onClose(new CloseEvent('close'));
         },
     }
     const socket = new Socket({
         url: '/test',
         protocols: '123',
-        createSocket(url, protocols) {
-            testUrl = url;
-            testProtocols = protocols;
-
+        createSocket(socket) {
+            testUrl = socket.options.url;
+            testProtocols = socket.options.protocols;
             return socketMock
         },
     });
@@ -33,7 +32,7 @@ test('createSocket', async () => {
     socket.send({ value: 'stateless' });
 
     setTimeout(() => {
-        socketMock.onopen && socketMock.onopen({});
+        socketMock.onOpen && socketMock.onOpen(new Event('open'));
     }, 100)
 
     socket.subscribeState((state) => {
@@ -78,7 +77,7 @@ test('createSocket', async () => {
 
     socket.send({ value: 'disconnect' });
     setTimeout(() => {
-        socketMock.onerror && socketMock.onerror({});
+        socketMock.onError && socketMock.onError(new Event('error'));
     }, 100)
     ok = await socket.connect();
     assert.isTrue(true);
@@ -98,15 +97,15 @@ test('createSocket', async () => {
     assert.deepEqual(stateArr, [SocketState.pending, SocketState.open, SocketState.close, SocketState.pending, SocketState.error, SocketState.stateless])
 })
 
-test('onmessage', async () => {
-    const socketMock: SocketConnectInstance = {
-        onclose: null,
-        onerror: null,
-        onmessage: null,
-        onopen: null,
+test('onMessage', async () => {
+    const socketMock: SocketBridge = {
+        onClose: null,
+        onError: null,
+        onMessage: null,
+        onOpen: null,
         send() {}, 
         close() { 
-            socketMock.onclose && socketMock.onclose({});
+            socketMock.onClose && socketMock.onClose(new CloseEvent('close'));
         },
     }
     const socket = new Socket({
@@ -116,18 +115,18 @@ test('onmessage', async () => {
         },
     });
     setTimeout(() => {
-        socketMock.onopen && socketMock.onopen({});
+        socketMock.onOpen && socketMock.onOpen(new Event('open'));
     }, 100)
     await socket.connect();
     const dataArr: any[] = [];
-    const un = socket.subscribeMessage((data) => {
-        dataArr.push(data);
+    const un = socket.subscribeMessage((ev) => {
+        dataArr.push(ev.data);
     })
-    socketMock.onmessage && socketMock.onmessage({ value: 1 })
-    socketMock.onmessage && socketMock.onmessage({ value: 2 })
+    socketMock.onMessage && socketMock.onMessage(new MessageEvent('message', { data: { value: 1 } }))
+    socketMock.onMessage && socketMock.onMessage(new MessageEvent('message', { data: { value: 2 } }))
 
     un();
-    socketMock.onmessage && socketMock.onmessage({ value: 3 })
+    socketMock.onMessage && socketMock.onMessage(new MessageEvent('message', { data: { value: 3 } }))
     assert.deepEqual(dataArr, [
         {
             value: 1
@@ -139,15 +138,15 @@ test('onmessage', async () => {
 });
 
 test('asyncOptions', async () => {
-    const socketMock: SocketConnectInstance = {
-        onclose: null,
-        onerror: null,
-        onmessage: null,
-        onopen: null,
+    const socketMock: SocketBridge = {
+        onClose: null,
+        onError: null,
+        onMessage: null,
+        onOpen: null,
         send() {
         },
         close() {
-            socketMock.onclose && socketMock.onclose({});
+            socketMock.onClose && socketMock.onClose(new CloseEvent('close'));
         },
     }
     let testUrl = '';
@@ -158,9 +157,9 @@ test('asyncOptions', async () => {
                 resolve({
                     url: '/test',
                     protocols: ['1', '2'],
-                    createSocket(url, protocols) {
-                        testUrl = url;
-                        testProtocols = protocols;
+                    createSocket(socket) {
+                        testUrl = socket.options.url;
+                        testProtocols = socket.options.protocols;
                         return socketMock;
                     },
                 });
@@ -168,7 +167,7 @@ test('asyncOptions', async () => {
         })
     });
     setTimeout(() => {
-        socketMock.onopen && socketMock.onopen({});
+        socketMock.onOpen && socketMock.onOpen(new Event('open'));
     }, 200)
     await socket.connect();
 

@@ -23,6 +23,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "happy-dom": "^9.9.2",
     "@typescript-eslint/eslint-plugin": "^5.59.0",
     "@typescript-eslint/parser": "^5.59.0",
     "@vitest/coverage-c8": "0.30.1",

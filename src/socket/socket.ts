@@ -1,6 +1,7 @@
-import { SocketOptions, SocketState, SocketConnectInstance, SocketAsyncOptions } from './socket-options';
+import { SocketOptions, SocketState, SocketBridge, SocketAsyncOptions } from './socket-options';
 import { CustomEvent } from './custom-event';
 import { retryPlugin, pingPlugin } from '../plugins';
+import { WebSocketBridge } from '../bridge/web-socket'
 
 enum UserState {
     connect,
@@ -8,17 +9,20 @@ enum UserState {
     destroy
 }
 
-export class Socket<Send extends {} = any, Message extends {} = any> {
+export class Socket<Send extends {} = any, MessageData extends {} = any> {
     public options: SocketOptions = {
         url: '',
         retryInterval: 3000,
-        pingInterval: 1000 * 60
+        pingInterval: 1000 * 5,
+        createSocket(socket) {
+            return new WebSocketBridge(socket.options.url, socket.options.protocols)
+        },
     }
     public state: SocketState = SocketState.stateless;
-    private _socket: SocketConnectInstance | null = null
+    private _socket: SocketBridge | null = null
     private _userState: UserState = UserState.connect;
     private _stateEvent = new CustomEvent<SocketState>()
-    private _messageEvent = new CustomEvent<Message>();
+    private _messageEvent = new CustomEvent<MessageEvent<MessageData>>();
     private _asyncOptions: SocketAsyncOptions | null = null;
     private _sendData: any[] = [];
     public constructor(options: Partial<SocketOptions> | SocketAsyncOptions) {
@@ -33,9 +37,7 @@ export class Socket<Send extends {} = any, Message extends {} = any> {
     public async connect(): Promise<boolean> {
         this._userState = UserState.connect;
         this._connect();
-        if (typeof navigator === 'object' && navigator.onLine) {
-            return false;
-        } else if (this.state === SocketState.open) {
+         if (this.state === SocketState.open) {
             return true;
         }
         return new Promise<boolean>((resolve) => {
@@ -73,7 +75,7 @@ export class Socket<Send extends {} = any, Message extends {} = any> {
             this._stateEvent.removeListen(listener);
         }
     }
-    public subscribeMessage(listener: (message: Message) => void) {
+    public subscribeMessage(listener: (message: MessageEvent<MessageData>) => void) {
         this._messageEvent.listen(listener);
         return () => {
             this._messageEvent.removeListen(listener);
@@ -84,6 +86,8 @@ export class Socket<Send extends {} = any, Message extends {} = any> {
         if (_socket && state === SocketState.open) {
             if (data instanceof ArrayBuffer) {
                 _sendData.push(data);
+            } else if (typeof data === 'string') {
+                _socket.send(data);
             } else {
                 _socket.send(JSON.stringify(data));
             }
@@ -104,31 +108,32 @@ export class Socket<Send extends {} = any, Message extends {} = any> {
         if (this._userState === UserState.disconnect) {
             return;
         }
-        const { url, protocols, createSocket = createWebSocket } = this.options;
+        const {  createSocket } = this.options;
 
-        const socket = createSocket(url, protocols);
+        const socket = createSocket(this);
 
         const dispose = () => {
-            socket.onopen = null;
-            socket.onmessage = null;
-            socket.onclose = null;
-            socket.onerror = null;
+            socket.onOpen = null;
+            socket.onMessage = null;
+            socket.onClose = null;
+            socket.onError = null;
         }
-        socket.onmessage = (ev) => {
-            this._messageEvent.dispatchEvent(ev);
-        }
-        socket.onopen = () => {
+        socket.onOpen = () => {
             this._updateState(SocketState.open);
             this._sendData.forEach(data => {
                 this.send(data);
             })
             this._sendData.length = 0
         }
-        socket.onclose = () => {
+        socket.onMessage = (ev) => {
+            this._messageEvent.dispatchEvent(ev as any);
+        }
+
+        socket.onClose = () => {
             this._updateState(SocketState.close);
             dispose();
         }
-        socket.onerror = () => {
+        socket.onError = () => {
             this._updateState(SocketState.error);
             dispose();
         }
@@ -149,6 +154,4 @@ export class Socket<Send extends {} = any, Message extends {} = any> {
     }
 }
 
-function createWebSocket(url: string, protocols?: string | string[]): SocketConnectInstance {
-    return new WebSocket(url, protocols)
-}
+

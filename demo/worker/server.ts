@@ -1,8 +1,8 @@
 import dayjs from 'dayjs';
 import { Plugin, WebSocket } from 'vite';
 
-export const simplePlugin: Plugin = {
-    name: 'socket-simple',
+export const workerPlugin: Plugin = {
+    name: 'socket-worker',
     configureServer({ ws }) {
         ws.on('connection', (client) => {
             serverTime(client);
@@ -12,7 +12,7 @@ export const simplePlugin: Plugin = {
 
 function serverTime(client: WebSocket) {
     let timer: NodeJS.Timer | null = null;
-    const EVENT = 'server-time';
+    const EVENT = 'worker-time';
     const unsubscribe = () => {
         if (timer) {
             clearInterval(timer);

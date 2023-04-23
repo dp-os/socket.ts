@@ -1,10 +1,10 @@
 import { type Socket } from './socket';
 
-export interface SocketConnectInstance {
-    onmessage: ((event: any) => void) | null;
-    onopen: ((event: any) => void) | null;
-    onclose: ((event: any) => void) | null;
-    onerror: ((event: any) => void) | null;
+export interface SocketBridge {
+    onMessage: ((ev: MessageEvent) => void) | null;
+    onOpen: ((ev: Event) => any) | null
+    onClose: ((ev: CloseEvent) => any) | null
+    onError: ((ev: Event) => any) | null
     close: (code?: number, reason?: string) => void
     send(data: any): void;
 }
@@ -17,7 +17,7 @@ export interface SocketOptions {
     retryInterval?: number;
     pingInterval?: number;
     pingData?: any;
-    createSocket?: (url: string, protocols?: string | string[]) => SocketConnectInstance;
+    createSocket: (socket: Socket) => SocketBridge;
     plugins?: SocketPlugin[]
 }
 

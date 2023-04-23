@@ -1,6 +1,9 @@
 import { Socket, SocketState } from '../socket';
 
 export function pingPlugin(socket: Socket) {
+    if (typeof window !=='object') {
+        return;
+    }
     let timer: NodeJS.Timeout | null = null;
     const defaultData ={
         type: 'heartbeat'
