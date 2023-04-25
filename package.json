@@ -1,10 +1,11 @@
 {
   "name": "socket.ts",
-  "version": "0.0.3",
+  "version": "0.0.6",
   "description": "",
   "type": "module",
   "main": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "files": ["dist", "src", "demo"],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
