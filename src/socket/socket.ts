@@ -1,7 +1,7 @@
 import { SocketOptions, SocketState, SocketBridge, SocketAsyncOptions } from './socket-options';
 import { CustomEvent } from './custom-event';
-import { retryPlugin, pingPlugin, workerPlugin } from '../plugins';
-import { WebSocketBridge } from '../bridge/web-socket'
+import { retryPlugin, pingPlugin } from '../plugins';
+import { WebSocketBridge, workerPlugin } from '../bridge'
 
 enum UserState {
     connect,
@@ -22,8 +22,9 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
     private _socket: SocketBridge | null = null
     private _userState: UserState = UserState.connect;
     private _stateEvent = new CustomEvent<SocketState>()
-    private _messageEvent = new CustomEvent<MessageData>();
+    private _messageEvent = new CustomEvent<MessageEvent<MessageData>>();
     private _asyncOptions: SocketAsyncOptions | null = null;
+    private _dataEvent = new CustomEvent<MessageData>();
     private _sendData: any[] = [];
     public constructor(options: Partial<SocketOptions> | SocketAsyncOptions) {
         if (typeof options === 'function') {
@@ -80,10 +81,16 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
             this._stateEvent.removeListen(listener);
         };
     }
-    public subscribeMessage(listener: (message: MessageData) => void) {
+    public subscribeMessage(listener: (message: MessageEvent<MessageData>) => void) {
         this._messageEvent.listen(listener);
         return () => {
             this._messageEvent.removeListen(listener);
+        };
+    }
+    public subscribeData(listener: (message: MessageData) => void) {
+        this._dataEvent.listen(listener);
+        return () => {
+            this._dataEvent.removeListen(listener);
         };
     }
     public send(data: Send): boolean {
@@ -134,8 +141,11 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
         }
 
         socket.onMessage = (ev) => {
-            const data = transformResponse(ev) as MessageData;
-            this._messageEvent.dispatchEvent(data);
+            this._messageEvent.dispatchEvent(ev);
+            if (this._dataEvent.size >0 ) {
+                const data = transformResponse(ev) as MessageData;
+                this._dataEvent.dispatchEvent(data);
+            }
         }
 
         socket.onClose = () => {

@@ -74,7 +74,7 @@ app.$mount('#app');
 socket.subscribeState((state) => {
     app.state = state;
 })
-socket.subscribeMessage((result) => {
+socket.subscribeData((result) => {
     switch (result.event) {
         case EVENT_ACTION.pushClientSymbol:
             app.symbolList = result.symbols;
