@@ -31,7 +31,7 @@ function serverTime(client: WebSocket) {
         const pushCount = randomNumber(10, 50);
 
         for (let i =0; i < pushCount; i++)  {
-            const index = randomNumber(0, symbolData.length - 1);
+            const index = randomNumber(0, 100);
             const item = symbolData[index];
             // 判断是否上涨还是下跌
             const isUp = randomNumber(0, 10) > 5 ? true : false;

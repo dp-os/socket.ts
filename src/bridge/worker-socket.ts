@@ -1,19 +1,25 @@
 import { type Socket } from '../socket';
 import { SocketState, type SocketBridge } from '../socket';
 
-enum ActionType {
+enum UIActionType {
     send = 'send',
-    state = 'state',
-    data = 'data'
+    refresh = 'refresh'
 }
+enum WorkerActionType {
+    state = 'state',
+    message = 'message'
+}
+
 export class WorkerSocketBridge implements SocketBridge {
     private _worker: Worker;
-    public constructor (worker: Worker) {
+    private _timer: NodeJS.Timeout | null = null;
+    private _pingTime = Date.now();
+    public constructor(worker: Worker) {
         this._worker = worker;
         worker.addEventListener('message', (ev) => {
             const type = ev.data.type;
             switch (type) {
-                case ActionType.state:
+                case WorkerActionType.state:
                     switch (ev.data.data) {
                         case SocketState.open:
                             this.onOpen && this.onOpen(new Event('onopen'));
@@ -23,13 +29,29 @@ export class WorkerSocketBridge implements SocketBridge {
                             break;
                     }
                     break;
-                case ActionType.data:
-                    this.onMessage && this.onMessage(new MessageEvent('message', {
-                        data: ev.data.data,
-                    }));
+                case WorkerActionType.message:
+                    ev.data.data.forEach((item: any) => {
+                        this.onMessage && this.onMessage(new MessageEvent('message', {
+                            data: item,
+                        }));
+                    })
                     break;
             }
         })
+        this._ping = this._ping.bind(this);
+        this._ping();
+    }
+    private _ping() {
+        const now = Date.now();
+        const interval = now - this._pingTime;
+        this._worker.postMessage({
+            type: UIActionType.refresh,
+            data: {
+                interval
+            }
+        });
+        this._pingTime = now;
+        this._timer = setTimeout(this._ping, 20);
     }
     public onOpen: SocketBridge['onOpen'] = null;
     public onMessage: SocketBridge['onMessage'] = null;
@@ -44,10 +66,14 @@ export class WorkerSocketBridge implements SocketBridge {
             });
             this.onClose(event);
         }
+        if (this._timer) {
+            clearTimeout(this._timer);
+            this._timer = null;
+        }
     }
     public send(data: any): void {
         this._worker.postMessage({
-            type: 'send',
+            type: UIActionType.send,
             data,
         });
     }
@@ -56,18 +82,38 @@ export class WorkerSocketBridge implements SocketBridge {
 
 export function workerPlugin(socket: Socket) {
     const isWorker = (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope);
-    function handle(type: ActionType, data: any) {
+    const dataArr: any[] = [];
+    const sendData = (interval: number) => {
+        if (interval < 200) {
+            while (dataArr.length) {
+                const sendArr = dataArr.splice(0, 10);
+                if (sendArr.length) {
+                    postMessage({
+                        type: WorkerActionType.message,
+                        data: sendArr,
+                    });
+                    break;
+                }
+            }
+        }
+
+    }
+    function handle(type: UIActionType | WorkerActionType, data: any) {
         switch (type) {
-            case ActionType.send:
+            case UIActionType.send:
                 socket.send(data);
                 break;
-            case ActionType.state:
+            case UIActionType.refresh:
+
+                sendData(data.interval);
+                break;
+            case WorkerActionType.state:
                 postMessage({
                     type,
                     data,
                 });
                 break;
-            case ActionType.data:
+            case WorkerActionType.message:
                 postMessage({
                     type,
                     data,
@@ -80,9 +126,10 @@ export function workerPlugin(socket: Socket) {
         handle(ev.data.type, ev.data.data);
     });
     socket.subscribeState((state) => {
-        handle(ActionType.state, state);
+        handle(WorkerActionType.state, state);
     });
+
     socket.subscribeData((data) => {
-        handle(ActionType.data, data);
+        dataArr.push(data);
     });
 }

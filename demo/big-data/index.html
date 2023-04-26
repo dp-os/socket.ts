@@ -17,13 +17,15 @@
         <table>
             <thead>
                 <tr>
+                    <td width="200">索引</td>
                     <td width="200">品种{{symbolList.length}}</td>
                     <td width="200">卖价</td>
                     <td width="200">买价</td>
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="item in symbolList" :key="item.symbol">
+                <tr v-for="(item, $index) in symbolList" :key="item.symbol">
+                    <td>{{$index}}</td>
                     <td>{{item.symbol}}</td>
                     <td>{{item.lastAskPx}}</td>
                     <td>{{item.lastBidPx}}</td>

@@ -2,7 +2,7 @@ import { Socket, SocketState } from '../../src';
 import { EVENT_NAME } from './config';
 
 const socket = new Socket({
-    url: 'ws://localhost:5173',
+    url: `ws://${location.hostname}:${location.port}`,
     protocols: 'vite-hmr',
 });
 
