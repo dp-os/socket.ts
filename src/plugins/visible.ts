@@ -23,7 +23,7 @@ export function visiblePlugin(options: VisibilityPluginOptions) {
         const end = () => {
             document.removeEventListener('visibilitychange', visibilitychange);
         }
-        socket.subscribeState((state: SocketState) => {
+        socket.stateEvent.listen((state: SocketState) => {
             switch (state) {
                 case SocketState.open:
                     start();

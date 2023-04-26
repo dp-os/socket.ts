@@ -10,6 +10,8 @@ export class CustomEvent<T, R = any> {
      */
     public listen(listener: CustomEventListener<T, R>) {
         this._list.push(listener);
+
+        return listener;
     }
     /**
      * 发射事件

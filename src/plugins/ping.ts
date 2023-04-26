@@ -26,7 +26,7 @@ export function pingPlugin(socket: Socket) {
             timer = null;
         }
     }
-    socket.subscribeState((state) => {
+    socket.stateEvent.listen((state) => {
         if (state === SocketState.open) {
             start();
         } else {

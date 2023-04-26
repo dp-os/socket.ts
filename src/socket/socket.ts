@@ -21,10 +21,12 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
     public state: SocketState = SocketState.stateless;
     private _socket: SocketBridge | null = null
     private _userState: UserState = UserState.connect;
-    private _stateEvent = new CustomEvent<SocketState>()
-    private _messageEvent = new CustomEvent<MessageEvent<MessageData>>();
+
+    public readonly stateEvent = new CustomEvent<SocketState>()
+    public readonly messageEvent = new CustomEvent<MessageEvent<MessageData>>();
+    public readonly dataEvent = new CustomEvent<MessageData>();
+
     private _asyncOptions: SocketAsyncOptions | null = null;
-    private _dataEvent = new CustomEvent<MessageData>();
     private _sendData: any[] = [];
     public constructor(options: Partial<SocketOptions> | SocketAsyncOptions) {
         if (typeof options === 'function') {
@@ -47,8 +49,8 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
             return true;
         }
         return new Promise<boolean>((resolve) => {
-            const un = this.subscribeState((state) => {
-                un();
+            const listen = (state: SocketState) => {
+                this.stateEvent.removeListen(listen);
                 switch (state) {
                     case SocketState.open:
                         resolve(true);
@@ -57,7 +59,8 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
                         resolve(false);
                         break;
                 }
-            });
+            }
+            this.stateEvent.listen(listen);
         })
     }
 
@@ -72,26 +75,8 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
         this.disconnect();
         this._updateState(SocketState.stateless);
         this._sendData.length = 0;
-        this._stateEvent.destroy();
-        this._messageEvent.destroy();
-    }
-    public subscribeState(listener: (state: SocketState) => void) {
-        this._stateEvent.listen(listener);
-        return () => {
-            this._stateEvent.removeListen(listener);
-        };
-    }
-    public subscribeMessage(listener: (message: MessageEvent<MessageData>) => void) {
-        this._messageEvent.listen(listener);
-        return () => {
-            this._messageEvent.removeListen(listener);
-        };
-    }
-    public subscribeData(listener: (message: MessageData) => void) {
-        this._dataEvent.listen(listener);
-        return () => {
-            this._dataEvent.removeListen(listener);
-        };
+        this.stateEvent.destroy();
+        this.messageEvent.destroy();
     }
     public send(data: Send): boolean {
         const { state, _socket, _sendData } = this;
@@ -139,7 +124,7 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
             })
             this._sendData.length = 0;
         }
-        const { _messageEvent, _dataEvent } = this;
+        const { messageEvent: _messageEvent, dataEvent: _dataEvent } = this;
         socket.onMessage = (ev) => {
             _messageEvent.dispatchEvent(ev);
             if (_dataEvent.size > 0) {
@@ -170,7 +155,7 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
     private _updateState(state: SocketState) {
         if (this.state === state) return;
         this.state = state;
-        this._stateEvent.dispatchEvent(state);
+        this.stateEvent.dispatchEvent(state);
     }
 }
 

@@ -125,11 +125,11 @@ export function workerPlugin(socket: Socket) {
     addEventListener('message', (ev) => {
         handle(ev.data.type, ev.data.data);
     });
-    socket.subscribeState((state) => {
+    socket.stateEvent.listen((state) => {
         handle(WorkerActionType.state, state);
     });
 
-    socket.subscribeData((data) => {
+    socket.dataEvent.listen((data) => {
         dataArr.push(data);
     });
 }
