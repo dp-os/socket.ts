@@ -74,8 +74,7 @@ app.$mount('#app');
 socket.subscribeState((state) => {
     app.state = state;
 })
-socket.subscribeMessage((ev) => {
-    const result = typeof ev.data === 'string' ? JSON.parse(ev.data) : ev.data;
+socket.subscribeMessage((result) => {
     switch (result.event) {
         case EVENT_ACTION.pushClientSymbol:
             app.symbolList = result.symbols;

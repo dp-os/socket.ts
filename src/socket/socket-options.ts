@@ -49,11 +49,13 @@ export interface SocketOptions {
      */
     createBridge: (socket: Socket) => SocketBridge;
     /**
+     * After receiving data pushed from the server, you want to convert it into another format.
+     * @param event
+     * @returns Returns the converted data.
+    */
+    transformResponse?: (event: MessageEvent) => any
+    /**
      * The plugins used.
      */
     plugins?: SocketPlugin[];
-    /**
-     * Push messages when the page is hidden. Default is: true.
-     */
-    pushHiddenMessage?: boolean;
 }

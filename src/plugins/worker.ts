@@ -22,7 +22,6 @@ export function workerPlugin(socket: Socket) {
         }
     }
     if (!isWorker) return;
-
     addEventListener('message', (ev) => {
         handle(ev.data.type, ev.data.data);
     });
@@ -30,6 +29,6 @@ export function workerPlugin(socket: Socket) {
         handle('state', state);
     });
     socket.subscribeMessage((ev) => {
-        handle('message', ev.data);
+        handle('message', ev);
     });
 }

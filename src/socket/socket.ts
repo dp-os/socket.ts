@@ -14,16 +14,15 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
         url: '',
         retryInterval: 1000 * 30,
         pingInterval: 1000 * 60,
-        pushHiddenMessage: true,
         createBridge(socket) {
             return new WebSocketBridge(socket.options.url || '', socket.options.protocols);
-        },
+        }
     }
     public state: SocketState = SocketState.stateless;
     private _socket: SocketBridge | null = null
     private _userState: UserState = UserState.connect;
     private _stateEvent = new CustomEvent<SocketState>()
-    private _messageEvent = new CustomEvent<MessageEvent<MessageData>>();
+    private _messageEvent = new CustomEvent<MessageData>();
     private _asyncOptions: SocketAsyncOptions | null = null;
     private _sendData: any[] = [];
     public constructor(options: Partial<SocketOptions> | SocketAsyncOptions) {
@@ -81,7 +80,7 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
             this._stateEvent.removeListen(listener);
         };
     }
-    public subscribeMessage(listener: (message: MessageEvent<MessageData>) => void) {
+    public subscribeMessage(listener: (message: MessageData) => void) {
         this._messageEvent.listen(listener);
         return () => {
             this._messageEvent.removeListen(listener);
@@ -115,7 +114,7 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
             return;
         }
 
-        const { createBridge } = this.options;
+        const { createBridge, transformResponse = defaultTransformResponse } = this.options;
 
         const socket = createBridge(this);
 
@@ -135,12 +134,8 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
         }
 
         socket.onMessage = (ev) => {
-            const { pushHiddenMessage } = this.options;
-            // do not push message when page is hidden & pushHiddenMessage is false
-            if (document.hidden && !pushHiddenMessage) {
-                return;
-            }
-            this._messageEvent.dispatchEvent(ev as any);
+            const data = transformResponse(ev) as MessageData;
+            this._messageEvent.dispatchEvent(data);
         }
 
         socket.onClose = () => {
@@ -170,3 +165,11 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
 }
 
 
+
+export function defaultTransformResponse(ev: MessageEvent) {
+    const data = ev.data;
+    if (typeof data === 'string' && (data.startsWith('{') || data.startsWith('['))) {
+        return JSON.parse(data);
+    }
+    return ev.data;
+}

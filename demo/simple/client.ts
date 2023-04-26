@@ -46,8 +46,7 @@ function initState() {
 function initTime() {
     const timeEl = document.getElementById('time')!;
 
-    socket.subscribeMessage((ev) => {
-        const result = JSON.parse(ev.data);
+    socket.subscribeMessage((result) => {
         if (result.event === EVENT_NAME) {
             timeEl.innerText = result.data.date;
         }

@@ -4,7 +4,6 @@ import { EVENT_NAME } from './config';
 const socket = new Socket({
     url: 'ws://localhost:5173',
     protocols: 'vite-hmr',
-    pushHiddenMessage: false,
     plugins: [
         visiblePlugin({
             visible: (socket) => {
@@ -61,8 +60,7 @@ function initState() {
 function initTime() {
     const timeEl = document.getElementById('time')!;
 
-    socket.subscribeMessage((ev) => {
-        const result = JSON.parse(ev.data);
+    socket.subscribeMessage((result) => {
         if (result.event === EVENT_NAME) {
             timeEl.innerHTML += `<div>${result.data.date}<div/>`
         }
