@@ -1,7 +1,7 @@
 import { type Socket } from '../socket';
 
 export function workerPlugin(socket: Socket) {
-    const isWorker = (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope)
+    const isWorker = (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope);
     function handle(type: string, data: any) {
         switch (type) {
             case 'send':
@@ -10,13 +10,13 @@ export function workerPlugin(socket: Socket) {
             case 'state':
                 postMessage({
                     type,
-                    data
+                    data,
                 });
                 break;
             case 'message':
                 postMessage({
                     type,
-                    data
+                    data,
                 });
                 break;
         }
@@ -28,8 +28,8 @@ export function workerPlugin(socket: Socket) {
     });
     socket.subscribeState((state) => {
         handle('state', state);
-    })
+    });
     socket.subscribeMessage((ev) => {
         handle('message', ev.data);
-    })
+    });
 }

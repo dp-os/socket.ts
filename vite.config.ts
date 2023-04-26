@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import { simplePlugin } from './demo/simple/server';
 import { workerPlugin } from './demo/worker/server';
 import { BigDataPlugin } from './demo/big-data/server';
+import { visiblePlugin } from './demo/visible/server';
 
 export default defineConfig({
     test: {
@@ -14,6 +15,7 @@ export default defineConfig({
     plugins: [
         simplePlugin,
         workerPlugin,
+        visiblePlugin,
         BigDataPlugin
     ],
     resolve: {

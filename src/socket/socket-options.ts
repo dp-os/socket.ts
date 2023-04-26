@@ -2,16 +2,14 @@ import { type Socket } from './socket';
 
 export interface SocketBridge {
     onMessage: ((ev: MessageEvent) => void) | null;
-    onOpen: ((ev: Event) => any) | null
-    onClose: ((ev: CloseEvent) => any) | null
-    onError: ((ev: Event) => any) | null
-    close: (code?: number, reason?: string) => void
+    onOpen: ((ev: Event) => any) | null;
+    onClose: ((ev: CloseEvent) => any) | null;
+    onError: ((ev: Event) => any) | null;
+    close: (code?: number, reason?: string) => void;
     send(data: any): void;
 }
 
 export type SocketPlugin = (socket: Socket) => void;
-
-
 
 export type SocketAsyncOptions = (() => Promise<Partial<Omit<SocketOptions, 'plugins'>>>);
 
@@ -20,8 +18,10 @@ export enum SocketState {
     pending = 'pending',
     open = 'open',
     error = 'error',
-    close = 'close'
-}export interface SocketOptions {
+    close = 'close',
+}
+
+export interface SocketOptions {
     /**
      * The URL of the Socket request.
      */
@@ -51,5 +51,9 @@ export enum SocketState {
     /**
      * The plugins used.
      */
-    plugins?: SocketPlugin[]
+    plugins?: SocketPlugin[];
+    /**
+     * Push messages when the page is hidden. Default is: true.
+     */
+    pushHiddenMessage?: boolean;
 }

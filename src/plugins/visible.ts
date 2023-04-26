@@ -1,6 +1,5 @@
 import { Socket, SocketState } from '../socket';
 
-
 export interface VisibilityPluginOptions {
     visible: (socket: Socket) => void;
     invisible: (socket: Socket) => void;

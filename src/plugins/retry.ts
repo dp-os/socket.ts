@@ -23,7 +23,7 @@ export function retryPlugin(socket: Socket) {
             timer = setTimeout(() => {
                 timer = null;
                 connect();
-            }, socket.options.retryInterval || 3000)
+            }, socket.options.retryInterval || 3000);
         }
     }
 
@@ -32,7 +32,7 @@ export function retryPlugin(socket: Socket) {
             case SocketState.stateless:
             case SocketState.pending:
             case SocketState.open:
-                end()
+                end();
                 break;
             case SocketState.close:
             case SocketState.error:

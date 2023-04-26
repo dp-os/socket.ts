@@ -2,8 +2,8 @@ import dayjs from 'dayjs';
 import { Plugin, WebSocket } from 'vite';
 import { EVENT_NAME } from './config';
 
-export const simplePlugin: Plugin = {
-    name: 'socket-simple',
+export const visiblePlugin: Plugin = {
+    name: 'socket-visible',
     configureServer({ ws }) {
         ws.on('connection', (client) => {
             serverTime(client);
