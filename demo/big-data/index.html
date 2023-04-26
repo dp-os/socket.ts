@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简单的例子</title>
+</head>
+<body>
+    <div id="app">
+        <button @click="onConnect">开始连接</button>
+        <button @click="onDisconnect">断开连接</button>
+        <button @click="getSymbolList">获取品种</button>
+        <button @click="subscribeQuote">订阅报价</button>
+        <button @click="unSubscribeServerQuote">停止报价</button>
+        <p>{{stateText}}</p>
+        <table>
+            <thead>
+                <tr>
+                    <td width="200">品种</td>
+                    <td width="200">卖价</td>
+                    <td width="200">买价</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="item in symbolList" :key="item.symbol">
+                    <td>{{item.symbol}}</td>
+                    <td>{{item.lastAskPx}}</td>
+                    <td>{{item.lastBidPx}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <script type="module" src="./client.ts"></script>
+</body>
+</html>
