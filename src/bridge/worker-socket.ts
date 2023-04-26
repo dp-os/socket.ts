@@ -80,7 +80,7 @@ export class WorkerSocketBridge implements SocketBridge {
 }
 
 
-export function workerPlugin(socket: Socket) {
+export function workerSyncToWindowPlugin(socket: Socket) {
     const isWorker = (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope);
     const dataArr: any[] = [];
     const sendData = (interval: number) => {

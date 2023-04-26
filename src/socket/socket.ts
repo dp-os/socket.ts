@@ -1,7 +1,7 @@
 import { SocketOptions, SocketState, SocketBridge, SocketAsyncOptions } from './socket-options';
 import { CustomEvent } from './custom-event';
 import { retryPlugin, pingPlugin } from '../plugins';
-import { WebSocketBridge, workerPlugin } from '../bridge'
+import { WebSocketBridge } from '../bridge'
 
 enum UserState {
     connect,
@@ -37,7 +37,6 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
         const plugins = this.options.plugins || [];
         retryPlugin(this);
         pingPlugin(this);
-        workerPlugin(this);
         plugins.forEach(plugin => {
             plugin(this);
         });
