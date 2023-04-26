@@ -139,12 +139,12 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
             })
             this._sendData.length = 0;
         }
-
+        const { _messageEvent, _dataEvent } = this;
         socket.onMessage = (ev) => {
-            this._messageEvent.dispatchEvent(ev);
-            if (this._dataEvent.size >0 ) {
+            _messageEvent.dispatchEvent(ev);
+            if (_dataEvent.size > 0) {
                 const data = transformMessage(ev) as MessageData;
-                this._dataEvent.dispatchEvent(data);
+                _dataEvent.dispatchEvent(data);
             }
         }
 
