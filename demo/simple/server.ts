@@ -26,7 +26,7 @@ function serverTime(client: WebSocket) {
     const subscribe = (subscribe: boolean) => {
         if (subscribe) {
             if (timer) return;
-            timer = setInterval(send, 1000)
+            timer = setInterval(send, 1000);
             send();
         } else {
             unsubscribe();

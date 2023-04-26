@@ -3,7 +3,7 @@ import { EVENT_NAME } from './config';
 
 const socket = new Socket({
     url: 'ws://localhost:5173',
-    protocols: 'vite-hmr'
+    protocols: 'vite-hmr',
 });
 
 function initConnect() {
@@ -11,10 +11,10 @@ function initConnect() {
     const disconnectEl = document.getElementById('disconnect')!;
 
     connectEl.onclick = () => {
-        socket.connect()
+        socket.connect();
     }
     disconnectEl.onclick = () => {
-        socket.disconnect()
+        socket.disconnect();
     }
 }
 
@@ -61,19 +61,19 @@ function initSubscribe() {
         socket.send({
             type: 'custom',
             event: EVENT_NAME,
-            data: true
-        })
+            data: true,
+        });
     }
     unsubscribe.onclick = () => {
         socket.send({
             type: 'custom',
             event: EVENT_NAME,
-            data: false
-        })
+            data: false,
+        });
     }
 
 }
 initConnect();
 initState();
 initTime();
-initSubscribe()
+initSubscribe();

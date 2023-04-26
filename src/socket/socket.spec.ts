@@ -25,7 +25,7 @@ test('createBridge', async () => {
         createBridge(socket) {
             testUrl = socket.options.url || '';
             testProtocols = socket.options.protocols;
-            return socketMock
+            return socketMock;
         },
     });
 
@@ -53,7 +53,7 @@ test('createBridge', async () => {
     assert.isTrue(ok);
     assert.equal(testUrl, '/test');
     assert.equal(testProtocols, '123');
-    assert.deepEqual(stateArr, [SocketState.pending, SocketState.open])
+    assert.deepEqual(stateArr, [SocketState.pending, SocketState.open]);
 
     // Call again in connected state
     ok = await socket.connect();
@@ -64,7 +64,7 @@ test('createBridge', async () => {
     assert.isTrue(ok);
     assert.equal(testUrl, '/test');
     assert.equal(testProtocols, '123');
-    assert.deepEqual(stateArr, [SocketState.pending, SocketState.open])
+    assert.deepEqual(stateArr, [SocketState.pending, SocketState.open]);
 
     socket.disconnect();
     assert.equal(socket.state, SocketState.close);
@@ -72,7 +72,7 @@ test('createBridge', async () => {
     assert.isTrue(ok);
     assert.equal(testUrl, '/test');
     assert.equal(testProtocols, '123');
-    assert.deepEqual(stateArr, [SocketState.pending, SocketState.open, SocketState.close])
+    assert.deepEqual(stateArr, [SocketState.pending, SocketState.open, SocketState.close]);
 
 
     socket.send({ value: 'disconnect' });
@@ -86,7 +86,7 @@ test('createBridge', async () => {
     assert.isFalse(ok);
     assert.equal(testUrl, '/test');
     assert.equal(testProtocols, '123');
-    assert.deepEqual(stateArr, [SocketState.pending, SocketState.open, SocketState.close, SocketState.pending, SocketState.error])
+    assert.deepEqual(stateArr, [SocketState.pending, SocketState.open, SocketState.close, SocketState.pending, SocketState.error]);
 
     socket.dispose();
 
@@ -94,7 +94,7 @@ test('createBridge', async () => {
     assert.deepEqual(testDataArr, ['{"value":"stateless"}', '{"value":"open"}']);
     assert.equal(testUrl, '/test');
     assert.equal(testProtocols, '123');
-    assert.deepEqual(stateArr, [SocketState.pending, SocketState.open, SocketState.close, SocketState.pending, SocketState.error, SocketState.stateless])
+    assert.deepEqual(stateArr, [SocketState.pending, SocketState.open, SocketState.close, SocketState.pending, SocketState.error, SocketState.stateless]);
 })
 
 test('onMessage', async () => {
@@ -111,7 +111,7 @@ test('onMessage', async () => {
     const socket = new Socket({
         url: '',
         createBridge() {
-            return socketMock
+            return socketMock;
         },
     });
     setTimeout(() => {
@@ -122,19 +122,19 @@ test('onMessage', async () => {
     const un = socket.subscribeMessage((ev) => {
         dataArr.push(ev.data);
     })
-    socketMock.onMessage && socketMock.onMessage(new MessageEvent('message', { data: { value: 1 } }))
-    socketMock.onMessage && socketMock.onMessage(new MessageEvent('message', { data: { value: 2 } }))
+    socketMock.onMessage && socketMock.onMessage(new MessageEvent('message', { data: { value: 1 } }));
+    socketMock.onMessage && socketMock.onMessage(new MessageEvent('message', { data: { value: 2 } }));
 
     un();
-    socketMock.onMessage && socketMock.onMessage(new MessageEvent('message', { data: { value: 3 } }))
+    socketMock.onMessage && socketMock.onMessage(new MessageEvent('message', { data: { value: 3 } }));
     assert.deepEqual(dataArr, [
         {
             value: 1
         },
         {
             value: 2
-        }
-    ])
+        },
+    ]);
 });
 
 test('asyncOptions', async () => {
@@ -168,7 +168,7 @@ test('asyncOptions', async () => {
     });
     setTimeout(() => {
         socketMock.onOpen && socketMock.onOpen(new Event('open'));
-    }, 200)
+    }, 200);
     await socket.connect();
 
     assert.equal(testUrl, '/test');

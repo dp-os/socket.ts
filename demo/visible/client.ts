@@ -8,12 +8,12 @@ const socket = new Socket({
             visible: (socket) => {
                 socket.send({
                     type: 'visible',
-                })
+                });
             },
             invisible: (socket) => {
                 socket.send({
                     type: 'invisible',
-                })
+                });
             },
         })
     ]
@@ -24,10 +24,10 @@ function initConnect() {
     const disconnectEl = document.getElementById('disconnect')!;
 
     connectEl.onclick = () => {
-        socket.connect()
+        socket.connect();
     }
     disconnectEl.onclick = () => {
-        socket.disconnect()
+        socket.disconnect();
     }
 }
 

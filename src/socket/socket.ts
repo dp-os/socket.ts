@@ -6,7 +6,7 @@ import { WebSocketBridge } from '../bridge/web-socket'
 enum UserState {
     connect,
     disconnect,
-    destroy
+    destroy,
 }
 
 export class Socket<Send extends {} = any, MessageData extends {} = any> {
@@ -16,7 +16,7 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
         pingInterval: 1000 * 60,
         createBridge(socket) {
             return new WebSocketBridge(socket.options.url || '', socket.options.protocols)
-        }
+        },
     }
     public state: SocketState = SocketState.stateless;
     private _socket: SocketBridge | null = null

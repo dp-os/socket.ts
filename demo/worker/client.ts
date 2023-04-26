@@ -14,11 +14,11 @@ function initConnect() {
     const disconnectEl = document.getElementById('disconnect')!;
 
     connectEl.onclick = () => {
-        socket.connect()
-    }
+        socket.connect();
+    };
     disconnectEl.onclick = () => {
-        socket.disconnect()
-    }
+        socket.disconnect();
+    };
 }
 
 function initState() {
@@ -64,19 +64,19 @@ export function initSubscribe() {
         socket.send({
             type: 'custom',
             event: EVENT_NAME,
-            data: true
-        })
+            data: true,
+        });
     }
     unsubscribe.onclick = () => {
         socket.send({
             type: 'custom',
             event: EVENT_NAME,
-            data: false
-        })
+            data: false,
+        });
     }
 
 }
 initConnect();
 initState();
 initTime();
-initSubscribe()
+initSubscribe();

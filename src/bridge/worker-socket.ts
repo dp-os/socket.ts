@@ -10,17 +10,17 @@ export class WorkerSocketBridge implements SocketBridge {
                 case 'state':
                     switch (ev.data.data) {
                         case SocketState.open:
-                            this.onOpen && this.onOpen(new Event('onopen'))
+                            this.onOpen && this.onOpen(new Event('onopen'));
                             break;
                         case SocketState.error:
-                            this.onError && this.onError(new Event('onerror'))
+                            this.onError && this.onError(new Event('onerror'));
                             break;
                     }
                     break;
                 case 'message':
                     this.onMessage && this.onMessage(new MessageEvent('message', {
-                        data: ev.data.data
-                    }))
+                        data: ev.data.data,
+                    }));
                     break;
             }
         })
@@ -34,7 +34,7 @@ export class WorkerSocketBridge implements SocketBridge {
         if (this.onClose) {
             const event = new CloseEvent('close', {
                 code,
-                reason
+                reason,
             });
             this.onClose(event);
         }
@@ -42,7 +42,7 @@ export class WorkerSocketBridge implements SocketBridge {
     public send(data: any): void {
         this._worker.postMessage({
             type: 'send',
-            data
+            data,
         });
     }
 }

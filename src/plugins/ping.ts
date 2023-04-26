@@ -30,7 +30,7 @@ export function pingPlugin(socket: Socket) {
         if (state === SocketState.open) {
             start();
         } else {
-            end()
+            end();
         }
     })
 }
