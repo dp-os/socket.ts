@@ -23,6 +23,11 @@ socket.subscribeMessage((messageEvent) => {
     console.log(messageEvent);
 });
 
+// The event triggered after calling the transformMessage method to parse the data.
+socket.subscribeData((data) => {
+    console.log(data);
+});
+
 // Send data to the server
 socket.send({ msg: 'I am ready.' });
 
@@ -66,8 +71,14 @@ export interface SocketOptions {
      */
     createBridge: (socket: Socket) => SocketBridge;
     /**
+     * After receiving data pushed from the server, you want to convert it into another format.
+     * @param event
+     * @returns Returns the converted data.
+    */
+    transformResponse?: (event: MessageEvent) => any
+    /**
      * The plugins used.
      */
-    plugins?: SocketPlugin[]
+    plugins?: SocketPlugin[];
 }
 ```

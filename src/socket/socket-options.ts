@@ -53,7 +53,7 @@ export interface SocketOptions {
      * @param event
      * @returns Returns the converted data.
     */
-    transformResponse?: (event: MessageEvent) => any
+    transformMessage?: (event: MessageEvent) => any
     /**
      * The plugins used.
      */

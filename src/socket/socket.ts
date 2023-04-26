@@ -121,7 +121,7 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
             return;
         }
 
-        const { createBridge, transformResponse = defaultTransformResponse } = this.options;
+        const { createBridge, transformMessage = defaultTransformMessage } = this.options;
 
         const socket = createBridge(this);
 
@@ -143,7 +143,7 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
         socket.onMessage = (ev) => {
             this._messageEvent.dispatchEvent(ev);
             if (this._dataEvent.size >0 ) {
-                const data = transformResponse(ev) as MessageData;
+                const data = transformMessage(ev) as MessageData;
                 this._dataEvent.dispatchEvent(data);
             }
         }
@@ -176,7 +176,7 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
 
 
 
-export function defaultTransformResponse(ev: MessageEvent) {
+export function defaultTransformMessage(ev: MessageEvent) {
     const data = ev.data;
     if (typeof data === 'string' && (data.startsWith('{') || data.startsWith('['))) {
         return JSON.parse(data);
