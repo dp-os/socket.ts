@@ -14,8 +14,9 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
         url: '',
         retryInterval: 1000 * 30,
         pingInterval: 1000 * 60,
+        pushHiddenMessage: true,
         createBridge(socket) {
-            return new WebSocketBridge(socket.options.url || '', socket.options.protocols)
+            return new WebSocketBridge(socket.options.url || '', socket.options.protocols);
         },
     }
     public state: SocketState = SocketState.stateless;
@@ -37,12 +38,12 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
         workerPlugin(this);
         plugins.forEach(plugin => {
             plugin(this);
-        })
+        });
     }
     public async connect(): Promise<boolean> {
         this._userState = UserState.connect;
         this._connect();
-         if (this.state === SocketState.open) {
+        if (this.state === SocketState.open) {
             return true;
         }
         return new Promise<boolean>((resolve) => {
@@ -70,7 +71,7 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
     public dispose(): void {
         this.disconnect();
         this._updateState(SocketState.stateless);
-        this._sendData.length = 0
+        this._sendData.length = 0;
         this._stateEvent.destroy();
         this._messageEvent.destroy();
     }
@@ -78,13 +79,13 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
         this._stateEvent.listen(listener);
         return () => {
             this._stateEvent.removeListen(listener);
-        }
+        };
     }
     public subscribeMessage(listener: (message: MessageEvent<MessageData>) => void) {
         this._messageEvent.listen(listener);
         return () => {
             this._messageEvent.removeListen(listener);
-        }
+        };
     }
     public send(data: Send): boolean {
         const { state, _socket, _sendData } = this;
@@ -99,21 +100,22 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
             return true;
         }
         _sendData.push(data);
-        return false
+        return false;
     }
     private async _connect() {
-
         if (this.state === SocketState.pending || this.state === SocketState.open) {
             return;
         }
 
         this._updateState(SocketState.pending);
+
         await this._getAsyncOptions();
 
         if (this._userState === UserState.disconnect) {
             return;
         }
-        const {  createBridge } = this.options;
+
+        const { createBridge } = this.options;
 
         const socket = createBridge(this);
 
@@ -123,14 +125,21 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
             socket.onClose = null;
             socket.onError = null;
         }
+
         socket.onOpen = () => {
             this._updateState(SocketState.open);
             this._sendData.forEach(data => {
                 this.send(data);
             })
-            this._sendData.length = 0
+            this._sendData.length = 0;
         }
+
         socket.onMessage = (ev) => {
+            const { pushHiddenMessage } = this.options;
+            // do not push message when page is hidden & pushHiddenMessage is false
+            if (document.hidden && !pushHiddenMessage) {
+                return;
+            }
             this._messageEvent.dispatchEvent(ev as any);
         }
 
@@ -138,10 +147,12 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
             this._updateState(SocketState.close);
             dispose();
         }
+
         socket.onError = () => {
             this._updateState(SocketState.error);
             dispose();
         }
+
         this._socket = socket;
     }
     private async _getAsyncOptions() {
@@ -152,7 +163,6 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
         }
     }
     private _updateState(state: SocketState) {
-
         if (this.state === state) return;
         this.state = state;
         this._stateEvent.dispatchEvent(state);

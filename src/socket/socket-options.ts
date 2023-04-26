@@ -52,4 +52,8 @@ export interface SocketOptions {
      * The plugins used.
      */
     plugins?: SocketPlugin[];
+    /**
+     * Push messages when the page is hidden. Default is: true.
+     */
+    pushHiddenMessage?: boolean;
 }
