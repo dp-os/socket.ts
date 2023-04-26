@@ -18,5 +18,4 @@ export interface SymbolDetail {
     digits: number;
     lastAskPx: number;
     lastBidPx: number;
-    lastPxTime: number;
 }
