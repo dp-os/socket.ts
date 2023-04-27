@@ -3,19 +3,24 @@ import { SocketState, type SocketBridge } from '../socket';
 
 enum UIActionType {
     send = 'send',
-    refresh = 'refresh'
+    ping = 'ping'
 }
 enum WorkerActionType {
     state = 'state',
     message = 'message'
 }
 
+export interface WorkerSocketBridgeOptions {
+    pingInterval?: number;
+}
+
 export class WorkerSocketBridge implements SocketBridge {
     private _worker: Worker;
     private _timer: NodeJS.Timeout | null = null;
-    private _pingTime = Date.now();
-    public constructor(worker: Worker) {
+    private pingInterval: number;
+    public constructor(worker: Worker, options: WorkerSocketBridgeOptions = {}) {
         this._worker = worker;
+        this.pingInterval = options.pingInterval || 50;
         worker.addEventListener('message', (ev) => {
             const type = ev.data.type;
             switch (type) {
@@ -42,16 +47,10 @@ export class WorkerSocketBridge implements SocketBridge {
         this._ping();
     }
     private _ping() {
-        const now = Date.now();
-        const interval = now - this._pingTime;
         this._worker.postMessage({
-            type: UIActionType.refresh,
-            data: {
-                interval
-            }
+            type: UIActionType.ping
         });
-        this._pingTime = now;
-        this._timer = setTimeout(this._ping, 20);
+        this._timer = setTimeout(this._ping, this.pingInterval);
     }
     public onOpen: SocketBridge['onOpen'] = null;
     public onMessage: SocketBridge['onMessage'] = null;
@@ -79,33 +78,39 @@ export class WorkerSocketBridge implements SocketBridge {
     }
 }
 
+export interface InterceptInstance {
+    data: (data: any) => void;
+    ping: () => void;
+}
 
-export function workerSyncToWindowPlugin(socket: Socket) {
-    const isWorker = (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope);
-    const dataArr: any[] = [];
-    const sendData = (interval: number) => {
-        if (interval < 200) {
-            while (dataArr.length) {
-                const sendArr = dataArr.splice(0, 10);
-                if (sendArr.length) {
-                    postMessage({
-                        type: WorkerActionType.message,
-                        data: sendArr,
-                    });
-                    break;
-                }
-            }
+
+export type InterceptCallback = (postMessage: (data: any) => void) => InterceptInstance;
+
+export interface WorkerSyncToWindowPluginOptions {
+    createIntercept?: InterceptCallback;
+}
+
+const defaultIntercept: InterceptCallback = (postMessage) => {
+    return {
+        data: postMessage,
+        ping() {
         }
-
     }
+}
+
+export function workerSyncToWindowPlugin(socket: Socket, options: WorkerSyncToWindowPluginOptions = {}) {
+    const createIntercept =  options.createIntercept || defaultIntercept;
+    const isWorker = (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope);
+    const intercept = createIntercept((...data: any[]) => {
+        handle(WorkerActionType.message, data);
+    });
     function handle(type: UIActionType | WorkerActionType, data: any) {
         switch (type) {
             case UIActionType.send:
                 socket.send(data);
                 break;
-            case UIActionType.refresh:
-
-                sendData(data.interval);
+            case UIActionType.ping:
+                intercept.ping();
                 break;
             case WorkerActionType.state:
                 postMessage({
@@ -128,8 +133,5 @@ export function workerSyncToWindowPlugin(socket: Socket) {
     socket.stateEvent.listen((state) => {
         handle(WorkerActionType.state, state);
     });
-
-    socket.dataEvent.listen((data) => {
-        dataArr.push(data);
-    });
+    socket.dataEvent.listen(intercept.data);
 }
