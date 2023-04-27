@@ -150,8 +150,10 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
             const data = transformMessage(ev) as MessageData;
             this.dispatchEvent('data', data);
             if (recognizer) {
-                const eventName = recognizer(data);
-                this.dispatchEvent(eventName, data);
+                const result = recognizer(data);
+                if (result) {
+                    this.dispatchEvent(result.event, result.data);
+                }
             }
         }
 
