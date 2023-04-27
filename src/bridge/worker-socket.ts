@@ -78,19 +78,19 @@ export class WorkerSocketBridge implements SocketBridge {
     }
 }
 
-export interface InterceptInstance {
+export interface WorkerInterceptInstance {
     data: (data: any) => void;
     ping: () => void;
 }
 
 
-export type InterceptCallback = (postMessage: (data: any) => void) => InterceptInstance;
+export type WorkerCreateInterceptInstance = (postMessage: (...data: any[]) => void) => WorkerInterceptInstance;
 
 export interface WorkerSyncToWindowPluginOptions {
-    createIntercept?: InterceptCallback;
+    createIntercept?: WorkerCreateInterceptInstance;
 }
 
-const defaultIntercept: InterceptCallback = (postMessage) => {
+const defaultIntercept: WorkerCreateInterceptInstance = (postMessage) => {
     return {
         data: postMessage,
         ping() {
@@ -98,40 +98,42 @@ const defaultIntercept: InterceptCallback = (postMessage) => {
     }
 }
 
-export function workerSyncToWindowPlugin(socket: Socket, options: WorkerSyncToWindowPluginOptions = {}) {
-    const createIntercept =  options.createIntercept || defaultIntercept;
-    const isWorker = (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope);
-    const intercept = createIntercept((...data: any[]) => {
-        handle(WorkerActionType.message, data);
-    });
-    function handle(type: UIActionType | WorkerActionType, data: any) {
-        switch (type) {
-            case UIActionType.send:
-                socket.send(data);
-                break;
-            case UIActionType.ping:
-                intercept.ping();
-                break;
-            case WorkerActionType.state:
-                postMessage({
-                    type,
-                    data,
-                });
-                break;
-            case WorkerActionType.message:
-                postMessage({
-                    type,
-                    data,
-                });
-                break;
+export function workerSyncToWindowPlugin(options: WorkerSyncToWindowPluginOptions = {}) {
+    return (socket: Socket, ) => {
+        const createIntercept =  options.createIntercept || defaultIntercept;
+        const isWorker = (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope);
+        const intercept = createIntercept((...data: any[]) => {
+            handle(WorkerActionType.message, data);
+        });
+        function handle(type: UIActionType | WorkerActionType, data: any) {
+            switch (type) {
+                case UIActionType.send:
+                    socket.send(data);
+                    break;
+                case UIActionType.ping:
+                    intercept.ping();
+                    break;
+                case WorkerActionType.state:
+                    postMessage({
+                        type,
+                        data,
+                    });
+                    break;
+                case WorkerActionType.message:
+                    postMessage({
+                        type,
+                        data,
+                    });
+                    break;
+            }
         }
+        if (!isWorker) return;
+        addEventListener('message', (ev) => {
+            handle(ev.data.type, ev.data.data);
+        });
+        socket.stateEvent.listen((state) => {
+            handle(WorkerActionType.state, state);
+        });
+        socket.dataEvent.listen(intercept.data);
     }
-    if (!isWorker) return;
-    addEventListener('message', (ev) => {
-        handle(ev.data.type, ev.data.data);
-    });
-    socket.stateEvent.listen((state) => {
-        handle(WorkerActionType.state, state);
-    });
-    socket.dataEvent.listen(intercept.data);
 }
