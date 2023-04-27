@@ -1,18 +1,11 @@
 {
   "name": "socket.ts",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "",
-  "type": "module",
-  "main": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/esm/index.d.ts",
   "files": ["dist", "src", "demo"],
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "node": "./dist/index.js",
-      "default": "./dist/index.mjs"
-    }
-  },
   "scripts": {
     "dev": "vite --host",
     "build:demo": "vite build",

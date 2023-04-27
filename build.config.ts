@@ -5,17 +5,14 @@ export default defineBuildConfig({
   entries: [
     {
       input: './src/',
+      outDir: './dist/esm',
       format: 'esm',
-      ext: 'mjs',
+      ext: 'js',
       declaration: true
     },
     {
       input: './src/',
-      format: 'cjs',
-      ext: 'js'
-    },
-    {
-      input: './src/',
+      outDir: './dist/cjs',
       format: 'cjs',
       ext: 'js'
     }

@@ -92,6 +92,18 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
         _sendData.push(data);
         return false;
     }
+    public subscribeState(listener: (state: SocketState) => void) {
+        this.stateEvent.listen(listener);
+        return () => {
+            this.stateEvent.removeListen(listener);
+        };
+    }
+    public subscribeMessage(listener: (message: MessageEvent<MessageData>) => void) {
+        this.messageEvent.listen(listener);
+        return () => {
+            this.messageEvent.removeListen(listener);
+        };
+    }
     private async _connect() {
         if (this.state === SocketState.pending || this.state === SocketState.open) {
             return;
