@@ -4,7 +4,7 @@ const socket = new Socket({
     url: 'ws://localhost:5173',
     protocols: 'vite-hmr',
     plugins: [
-        workerSyncToWindowPlugin
+        workerSyncToWindowPlugin()
     ]
 });
 
