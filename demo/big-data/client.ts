@@ -71,10 +71,10 @@ const app = new Vue<{ state: SocketState, symbolList: SymbolDetail[] }>({
 
 app.$mount('#app');
 
-socket.stateEvent.listen((state) => {
+socket.subscribeState((state) => {
     app.state = state;
 })
-socket.dataEvent.listen((result) => {
+socket.subscribeData((result) => {
     switch (result.event) {
         case EVENT_ACTION.pushClientSymbol:
             app.symbolList = result.symbols;

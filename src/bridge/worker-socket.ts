@@ -131,9 +131,9 @@ export function workerSyncToWindowPlugin(options: WorkerSyncToWindowPluginOption
         addEventListener('message', (ev) => {
             handle(ev.data.type, ev.data.data);
         });
-        socket.stateEvent.listen((state) => {
+        socket.subscribeState((state) => {
             handle(WorkerActionType.state, state);
         });
-        socket.dataEvent.listen(intercept.data);
+        socket.subscribeData(intercept.data);
     }
 }

@@ -58,4 +58,5 @@ export interface SocketOptions {
      * The plugins used.
      */
     plugins?: SocketPlugin[];
+    recognizer?: (data: any) => string;
 }

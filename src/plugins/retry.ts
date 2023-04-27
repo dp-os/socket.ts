@@ -27,7 +27,7 @@ export function retryPlugin(socket: Socket) {
         }
     }
 
-    socket.stateEvent.listen((state) => {
+    socket.subscribeState((state) => {
         switch (state) {
             case SocketState.stateless:
             case SocketState.pending:

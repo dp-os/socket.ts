@@ -35,7 +35,7 @@ test('createBridge', async () => {
         socketMock.onOpen && socketMock.onOpen(new Event('open'));
     }, 100)
 
-    socket.stateEvent.listen((state) => {
+    socket.subscribeState((state) => {
         stateArr.push(state);
     });
 
@@ -123,11 +123,11 @@ test('onMessage', async () => {
         dataArr.push(ev.data);
 
     };
-    socket.messageEvent.listen(listen)
+    const un = socket.subscribeMessage(listen)
     socketMock.onMessage && socketMock.onMessage(new MessageEvent('message', { data: { value: 1 } }));
     socketMock.onMessage && socketMock.onMessage(new MessageEvent('message', { data: { value: 2 } }));
 
-    socket.messageEvent.removeListen(listen);
+    un();
     socketMock.onMessage && socketMock.onMessage(new MessageEvent('message', { data: { value: 3 } }));
     assert.deepEqual(dataArr, [
         {

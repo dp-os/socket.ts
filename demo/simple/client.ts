@@ -4,6 +4,9 @@ import { EVENT_NAME } from './config';
 const socket = new Socket({
     url: `ws://${location.hostname}:${location.port}`,
     protocols: 'vite-hmr',
+    recognizer(data) {
+        return data.event;
+    },
 });
 
 function initConnect() {
@@ -20,7 +23,7 @@ function initConnect() {
 
 function initState() {
     const stateEl = document.getElementById('state')!;
-    socket.stateEvent.listen((state) => {
+    socket.subscribeState((state) => {
         let text = '';
         switch (state) {
             case SocketState.stateless:
@@ -46,10 +49,8 @@ function initState() {
 function initTime() {
     const timeEl = document.getElementById('time')!;
 
-    socket.dataEvent.listen((result) => {
-        if (result.event === EVENT_NAME) {
-            timeEl.innerText = result.data.date;
-        }
+    socket.subscribe( EVENT_NAME, (result) => {
+        timeEl.innerText = result.data.date;
     });
 }
 function initSubscribe() {

@@ -34,7 +34,7 @@ function initConnect() {
 
 function initState() {
     const stateEl = document.getElementById('state')!;
-    socket.stateEvent.listen((state) => {
+    socket.subscribeState((state) => {
         let text = '';
         switch (state) {
             case SocketState.stateless:
@@ -60,7 +60,7 @@ function initState() {
 function initTime() {
     const timeEl = document.getElementById('time')!;
 
-    socket.dataEvent.listen((result) => {
+    socket.subscribeData((result) => {
         if (result.event === EVENT_NAME) {
             timeEl.innerHTML += `<div>${result.data.date}<div/>`
         }
