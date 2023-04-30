@@ -22,9 +22,9 @@ test('createBridge', async () => {
     const socket = new Socket({
         url: '/test',
         protocols: '123',
-        createBridge(socket) {
-            testUrl = socket.options.url || '';
-            testProtocols = socket.options.protocols;
+        createBridge(options) {
+            testUrl = options.url || '';
+            testProtocols = options.protocols;
             return socketMock;
         },
     });
@@ -159,9 +159,9 @@ test('asyncOptions', async () => {
                 resolve({
                     url: '/test',
                     protocols: ['1', '2'],
-                    createBridge(socket) {
-                        testUrl = socket.options.url || '';
-                        testProtocols = socket.options.protocols;
+                    createBridge(options) {
+                        testUrl = options.url || '';
+                        testProtocols = options.protocols;
                         return socketMock;
                     },
                 });

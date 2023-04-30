@@ -47,7 +47,7 @@ export interface SocketOptions {
      * @param socket The current Socket instance.
      * @returns 
      */
-    createBridge: (socket: Socket) => SocketBridge;
+    createBridge: (options: SocketOptions) => SocketBridge;
     /**
      * After receiving data pushed from the server, you want to convert it into another format.
      * @param event

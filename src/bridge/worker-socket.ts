@@ -1,6 +1,8 @@
 import { type Socket } from '../socket';
 import { SocketState, type SocketBridge } from '../socket';
 
+const isWorker = (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope);
+
 enum UIActionType {
     send = 'send',
     ping = 'ping'
@@ -12,6 +14,17 @@ enum WorkerActionType {
 
 export interface WorkerSocketBridgeOptions {
     pingInterval?: number;
+    initParams?: any;
+}
+
+export function initSocketInWorker(cb: (params: any) => void) {
+    if (isWorker) {
+        const onMessage = (event: MessageEvent) => {
+            cb(event.data);
+            removeEventListener('message', onMessage)
+        };
+        addEventListener('message', onMessage);
+    }
 }
 
 export class WorkerSocketBridge implements SocketBridge {
@@ -43,6 +56,9 @@ export class WorkerSocketBridge implements SocketBridge {
                     break;
             }
         })
+        if (options.initParams) {
+            worker.postMessage(options.initParams);
+        }
         this._ping = this._ping.bind(this);
         this._ping();
     }
@@ -101,7 +117,6 @@ const defaultIntercept: WorkerCreateInterceptInstance = (postMessage) => {
 export function workerSyncToWindowPlugin(options: WorkerSyncToWindowPluginOptions = {}) {
     return (socket: Socket, ) => {
         const createIntercept =  options.createIntercept || defaultIntercept;
-        const isWorker = (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope);
         const intercept = createIntercept((...data: any[]) => {
             handle(WorkerActionType.message, data);
         });

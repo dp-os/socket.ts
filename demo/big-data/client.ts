@@ -6,7 +6,12 @@ import Vue from 'vue';
 
 const socket = new Socket({
     createBridge() {
-        return new WorkerSocketBridge(new SocketWorker());
+        return new WorkerSocketBridge(new SocketWorker(), {
+            initParams: {
+                url: `ws://${location.hostname}:${location.port}`,
+                protocols: 'vite-hmr',
+            }
+        });
     },
 })
 

@@ -14,8 +14,8 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
         url: '',
         retryInterval: 1000 * 30,
         pingInterval: 1000 * 60,
-        createBridge(socket) {
-            return new WebSocketBridge(socket.options.url || '', socket.options.protocols);
+        createBridge(options) {
+            return new WebSocketBridge(options.url || '', options.protocols);
         }
     }
     public state: SocketState = SocketState.stateless;
@@ -129,7 +129,7 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
 
         const { createBridge, transformMessage = defaultTransformMessage, recognizer } = this.options;
 
-        const socket = createBridge(this);
+        const socket = createBridge(this.options);
 
         const dispose = () => {
             socket.onOpen = null;

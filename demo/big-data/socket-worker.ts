@@ -1,4 +1,4 @@
-import { Socket, workerSyncToWindowPlugin, WorkerCreateInterceptInstance } from '../../src';
+import { Socket, workerSyncToWindowPlugin, WorkerCreateInterceptInstance, initSocketInWorker } from '../../src';
 
 
 const intercept: WorkerCreateInterceptInstance = (postMessage) => {
@@ -33,14 +33,16 @@ const intercept: WorkerCreateInterceptInstance = (postMessage) => {
     }
 }
 
-const socket = new Socket({
-    url: `ws://${location.hostname}:${location.port}`,
-    protocols: 'vite-hmr',
-    plugins: [
-        workerSyncToWindowPlugin({
-            createIntercept: intercept
-        })
-    ]
-});
-
-socket.connect();
+initSocketInWorker((params) => {
+    const socket = new Socket({
+        url: params.url,
+        protocols: params.protocols,
+        plugins: [
+            workerSyncToWindowPlugin({
+                createIntercept: intercept
+            })
+        ]
+    });
+    
+    socket.connect();
+})
