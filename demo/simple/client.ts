@@ -5,7 +5,10 @@ const socket = new Socket({
     url: `ws://${location.hostname}:${location.port}`,
     protocols: 'vite-hmr',
     recognizer(data) {
-        return data.event;
+        return {
+            event: data.event,
+            data: data.data
+        };
     },
 });
 
@@ -49,8 +52,8 @@ function initState() {
 function initTime() {
     const timeEl = document.getElementById('time')!;
 
-    socket.subscribe( EVENT_NAME, (result) => {
-        timeEl.innerText = result.data.date;
+    socket.subscribe(EVENT_NAME, (result) => {
+        timeEl.innerText = result.date;
     });
 }
 function initSubscribe() {
