@@ -45,6 +45,9 @@ export class WorkerSocketBridge implements SocketBridge {
                         case SocketState.error:
                             this.onError && this.onError(new Event('onerror'));
                             break;
+                        case SocketState.close:
+                            this.onClose && this.onClose(new CloseEvent('close'))
+                            break;
                     }
                     break;
                 case WorkerActionType.message:
