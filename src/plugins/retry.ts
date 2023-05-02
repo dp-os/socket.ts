@@ -6,7 +6,6 @@ export function retryPlugin(socket: Socket) {
     }
     let timer: NodeJS.Timeout | null = null;
     const connect =() => {
-        end()
         socket.connect();
     }
     const end = () => {
@@ -37,7 +36,6 @@ export function retryPlugin(socket: Socket) {
     socket.subscribeState((state) => {
         switch (state) {
             case SocketState.stateless:
-            case SocketState.pending:
             case SocketState.open:
                 end();
                 break;
