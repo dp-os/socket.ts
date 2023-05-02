@@ -6,6 +6,7 @@ export function retryPlugin(socket: Socket) {
     }
     let timer: NodeJS.Timeout | null = null;
     const connect =() => {
+        timer = null
         socket.connect();
     }
     const end = () => {
