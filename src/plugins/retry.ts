@@ -6,7 +6,7 @@ export function retryPlugin(socket: Socket) {
     }
     let timer: NodeJS.Timeout | null = null;
     const connect =() => {
-        timer = null
+        end()
         socket.connect();
     }
     const end = () => {
@@ -22,7 +22,6 @@ export function retryPlugin(socket: Socket) {
             window.addEventListener('online', connect);
             window.addEventListener('offline', end);
             timer = setTimeout(() => {
-                timer = null;
                 connect();
             }, socket.options.retryInterval || 3000);
         }
