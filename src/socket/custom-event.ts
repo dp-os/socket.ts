@@ -17,7 +17,7 @@ export class CustomEvent<T, R = any> {
      * 发射事件
      */
     public dispatchEvent(data: T) {
-        return this._list.map((cb) => cb(data));
+        return [...this._list].map((cb) => cb(data));
     }
     /**
      * 移除事件监听
