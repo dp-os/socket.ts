@@ -24,7 +24,9 @@ export function retryPlugin(socket: Socket) {
             window.addEventListener('offline', end);
             document.addEventListener('visibilitychange', visibilitychange);
             timer = setTimeout(() => {
-                connect();
+                if (navigator.onLine) {
+                    connect();
+                }
             }, socket.options.retryInterval || 3000);
         }
     }
