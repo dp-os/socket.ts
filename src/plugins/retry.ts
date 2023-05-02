@@ -13,6 +13,7 @@ export function retryPlugin(socket: Socket) {
         if (timer) {
             window.removeEventListener('online', connect);
             window.removeEventListener('offline', end);
+            document.removeEventListener('visibilitychange', visibilitychange);
             clearTimeout(timer);
             timer = null;
         }
@@ -21,9 +22,15 @@ export function retryPlugin(socket: Socket) {
         if (!timer) {
             window.addEventListener('online', connect);
             window.addEventListener('offline', end);
+            document.addEventListener('visibilitychange', visibilitychange);
             timer = setTimeout(() => {
                 connect();
             }, socket.options.retryInterval || 3000);
+        }
+    }
+    const visibilitychange = () => {
+        if (document.visibilityState === 'visible' && navigator.onLine) {
+            connect()
         }
     }
 
