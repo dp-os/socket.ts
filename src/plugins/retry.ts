@@ -24,14 +24,12 @@ export function retryPlugin(socket: Socket) {
             window.addEventListener('offline', end);
             document.addEventListener('visibilitychange', visibilitychange);
             timer = setTimeout(() => {
-                if (navigator.onLine) {
-                    connect();
-                }
+                connect();
             }, socket.options.retryInterval || 3000);
         }
     }
     const visibilitychange = () => {
-        if (document.visibilityState === 'visible' && navigator.onLine) {
+        if (document.visibilityState === 'visible') {
             connect()
         }
     }

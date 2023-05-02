@@ -37,6 +37,9 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
         if (this.disabled) {
             return false;
         }
+        if (typeof navigator === 'object' && !navigator.onLine) {
+            return false;
+        }
         if (this.state === SocketState.open) {
             return true;
         }
