@@ -3,12 +3,15 @@ import { CustomEvent } from './custom-event';
 import { retryPlugin, pingPlugin } from '../plugins';
 import { WebSocketBridge } from '../bridge'
 
+const isWindow = typeof Window === 'object';
+
 
 export class Socket<Send extends {} = any, MessageData extends {} = any> {
     public options: SocketOptions = {
         url: '',
         retryInterval: 1000 * 30,
         pingInterval: 1000 * 60,
+        offlineTime: 5000,
         createBridge(options) {
             return new WebSocketBridge(options.url || '', options.protocols);
         }
@@ -68,7 +71,7 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
         }
     }
     public start() {
-        this.disabled  = false
+        this.disabled = false
         return this.connect();
     }
     public stop() {
@@ -135,11 +138,34 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
 
         const socket = createBridge(this.options);
 
+        let timer: NodeJS.Timeout | null = null;
+        const close = () => {
+            this._updateState(SocketState.close);
+            dispose();
+        }
+        const clear = () => {
+            if (timer) {
+                clearTimeout(timer);
+                timer = null;
+            }
+        }
+        const offline = () => {
+            timer = setTimeout(() => {
+                if (this.state === SocketState.open) {
+                    close();
+                }
+            }, this.options.offlineTime)
+        }
         const dispose = () => {
+            clear();
             socket.onOpen = null;
             socket.onMessage = null;
             socket.onClose = null;
             socket.onError = null;
+            if (isWindow) {
+                window.removeEventListener('offline', offline);
+                window.removeEventListener('online', clear);
+            }
         }
 
         socket.onOpen = () => {
@@ -150,6 +176,9 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
             this._sendData.length = 0;
         }
         socket.onMessage = (ev) => {
+            if (this.state !== SocketState.open) {
+                return
+            }
             this.dispatchEvent('message', ev);
             const data = transformMessage(ev) as MessageData;
             this.dispatchEvent('data', data);
@@ -161,14 +190,15 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
             }
         }
 
-        socket.onClose = () => {
-            this._updateState(SocketState.close);
-            dispose();
-        }
+        socket.onClose = close;
 
         socket.onError = () => {
             this._updateState(SocketState.error);
             dispose();
+        }
+        if (typeof window === 'object') {
+            window.addEventListener('offline', offline);
+            window.addEventListener('online', clear);
         }
 
         this._socket = socket;

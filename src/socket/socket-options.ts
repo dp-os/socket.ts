@@ -42,6 +42,8 @@ export interface SocketOptions {
      * The data to be sent with the heartbeat.
      */
     pingData?: any;
+
+    offlineTime?: number;
     /**
      * Create a bridge. The default bridge is WorkerSocketBridge.
      * @param socket The current Socket instance.
