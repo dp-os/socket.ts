@@ -3,11 +3,6 @@ import { CustomEvent } from './custom-event';
 import { retryPlugin, pingPlugin } from '../plugins';
 import { WebSocketBridge } from '../bridge'
 
-enum UserState {
-    connect,
-    disconnect,
-    destroy,
-}
 
 export class Socket<Send extends {} = any, MessageData extends {} = any> {
     public options: SocketOptions = {
@@ -19,9 +14,9 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
         }
     }
     public state: SocketState = SocketState.stateless;
+    public disabled = false;
     private _mapEvent = new Map<string, CustomEvent<any>>();
     private _socket: SocketBridge | null = null
-    private _userState: UserState = UserState.connect;
 
     private _asyncOptions: SocketAsyncOptions | null = null;
     private _sendData: any[] = [];
@@ -39,11 +34,13 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
         });
     }
     public async connect(): Promise<boolean> {
-        this._userState = UserState.connect;
-        this._connect();
+        if (this.disabled) {
+            return false;
+        }
         if (this.state === SocketState.open) {
             return true;
         }
+        this._connect();
         return new Promise<boolean>((resolve) => {
             const listen = (state: SocketState) => {
                 un();
@@ -61,11 +58,18 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
     }
 
     public disconnect(): void {
-        this._userState = UserState.disconnect;
         if (this._socket) {
             this._socket.close();
             this._socket = null;
         }
+    }
+    public start() {
+        this.disabled  = false
+        return this.connect();
+    }
+    public stop() {
+        this.disabled = true;
+        this.disconnect();
     }
     public dispose(): void {
         this.disconnect();
@@ -115,17 +119,13 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
         return this.subscribe('data', listener)
     }
     private async _connect() {
-        if (this.state === SocketState.pending || this.state === SocketState.open) {
+        if (this.state === SocketState.pending) {
             return;
         }
 
         this._updateState(SocketState.pending);
 
         await this._getAsyncOptions();
-
-        if (this._userState === UserState.disconnect) {
-            return;
-        }
 
         const { createBridge, transformMessage = defaultTransformMessage, recognizer } = this.options;
 
