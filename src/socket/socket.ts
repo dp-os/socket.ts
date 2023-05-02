@@ -150,6 +150,7 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
             }
         }
         const offline = () => {
+            clear();
             timer = setTimeout(() => {
                 if (this.state === SocketState.open) {
                     close();
