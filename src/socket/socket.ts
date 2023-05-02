@@ -34,14 +34,15 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
         });
     }
     public async connect(): Promise<boolean> {
-        if (this.disabled) {
+        const { disabled, state } = this;
+        if (disabled) {
             return false;
         }
-        if (typeof navigator === 'object' && !navigator.onLine) {
-            return false;
-        }
-        if (this.state === SocketState.open) {
+        if (state === SocketState.open) {
             return true;
+        }
+        if (state !== SocketState.pending && typeof navigator === 'object' && !navigator.onLine) {
+            return false;
         }
         this._connect();
         return new Promise<boolean>((resolve) => {
