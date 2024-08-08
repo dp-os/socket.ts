@@ -84,6 +84,7 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
         this._updateState(SocketState.stateless);
         this._sendData.length = 0;
         this._mapEvent.clear();
+        this._dispose?.();
     }
     public send(data: Send): boolean {
         const { state, _socket, _sendData } = this;
