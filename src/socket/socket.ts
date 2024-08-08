@@ -23,6 +23,7 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
 
     private _asyncOptions: SocketAsyncOptions | null = null;
     private _sendData: any[] = [];
+    private _dispose: (() => void) | null = null;
     public constructor(options: Partial<SocketOptions> | SocketAsyncOptions) {
         if (typeof options === 'function') {
             this._asyncOptions = options;
@@ -129,6 +130,10 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
         if (this.state === SocketState.pending) {
             return;
         }
+        if (this._dispose) {
+            this._dispose()
+            this._dispose = null;
+        }
 
         this._updateState(SocketState.pending);
 
@@ -203,6 +208,7 @@ export class Socket<Send extends {} = any, MessageData extends {} = any> {
         }
 
         this._socket = socket;
+        this._dispose = dispose
     }
     private async _getAsyncOptions() {
         const { _asyncOptions } = this;
