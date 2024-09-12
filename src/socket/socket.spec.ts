@@ -94,7 +94,7 @@ test('createBridge', async () => {
     assert.deepEqual(testDataArr, ['{"value":"stateless"}', '{"value":"open"}']);
     assert.equal(testUrl, '/test');
     assert.equal(testProtocols, '123');
-    assert.deepEqual(stateArr, [SocketState.pending, SocketState.open, SocketState.close, SocketState.pending, SocketState.error, SocketState.stateless]);
+    assert.deepEqual(stateArr, [SocketState.pending, SocketState.open, SocketState.close, SocketState.pending, SocketState.error, SocketState.close, SocketState.stateless]);
 })
 
 test('onMessage', async () => {
