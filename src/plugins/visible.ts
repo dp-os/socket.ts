@@ -1,4 +1,5 @@
-import { Socket, SocketState } from '../socket';
+import type { Socket } from '../socket';
+import { SocketState } from '../socket-options'
 
 export interface VisibilityPluginOptions {
     visible: (socket: Socket) => void;
@@ -24,6 +25,7 @@ export function visiblePlugin(options: VisibilityPluginOptions) {
             document.removeEventListener('visibilitychange', visibilitychange);
         }
         socket.subscribeState((state: SocketState) => {
+            if (socket.disabled) return;
             switch (state) {
                 case SocketState.open:
                     start();

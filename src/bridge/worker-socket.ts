@@ -1,5 +1,5 @@
-import { type Socket } from '../socket';
-import { SocketState, type SocketBridge } from '../socket';
+import type { Socket } from '../socket';
+import { SocketState, type SocketBridge } from '../socket-options';
 
 const isWorker = (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope);
 
@@ -75,15 +75,8 @@ export class WorkerSocketBridge implements SocketBridge {
     public onMessage: SocketBridge['onMessage'] = null;
     public onClose: SocketBridge['onClose'] = null;
     public onError: SocketBridge['onError'] = null;
-    public close(code = 1000, reason?: string) {
+    public close() {
         this._worker.terminate();
-        if (this.onClose) {
-            const event = new CloseEvent('close', {
-                code,
-                reason,
-            });
-            this.onClose(event);
-        }
         if (this._timer) {
             clearTimeout(this._timer);
             this._timer = null;

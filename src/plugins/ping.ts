@@ -1,4 +1,5 @@
-import { Socket, SocketState } from '../socket';
+import type { Socket } from '../socket';
+import { SocketState } from '../socket-options'
 
 export function pingPlugin(socket: Socket) {
     if (typeof window !=='object') {

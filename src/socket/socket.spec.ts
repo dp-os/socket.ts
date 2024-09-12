@@ -1,5 +1,5 @@
 import { Socket, } from './socket';
-import { SocketState, SocketBridge } from './socket-options';
+import { SocketState, SocketBridge } from '../socket-options';
 import { test, assert } from 'vitest'
 
 test('createBridge', async () => {

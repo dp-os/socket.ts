@@ -1,4 +1,4 @@
-import { type SocketBridge } from '../socket';
+import type { SocketBridge } from '../socket-options';
 
 export class WebSocketBridge implements SocketBridge {
     private _socket: globalThis.WebSocket;

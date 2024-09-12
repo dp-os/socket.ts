@@ -1,4 +1,4 @@
-import { type Socket } from './socket';
+import { type Socket } from './socket/socket';
 
 export interface SocketBridge {
     onMessage: ((ev: MessageEvent) => void) | null;

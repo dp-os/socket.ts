@@ -1,4 +1,5 @@
-import { type Socket, SocketState } from '../socket';
+import type { Socket } from '../socket';
+import { SocketState } from '../socket-options'
 
 export function retryPlugin(socket: Socket) {
     if (typeof window !=='object') {
@@ -34,6 +35,7 @@ export function retryPlugin(socket: Socket) {
     }
 
     socket.subscribeState((state) => {
+        if (socket.disabled) return;
         switch (state) {
             case SocketState.stateless:
             case SocketState.open:
