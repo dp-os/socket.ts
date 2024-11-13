@@ -6,6 +6,7 @@ export function pingPlugin(socket: Socket) {
         return;
     }
     let timer: NodeJS.Timeout | null = null;
+    let hasNewMessage: boolean | null = null;
     const defaultData ={
         type: 'heartbeat'
     }
@@ -15,6 +16,14 @@ export function pingPlugin(socket: Socket) {
             if (pingInterval > 0) {
                 timer = setTimeout(() => {
                     timer = null;
+
+                    if (hasNewMessage === false) {
+                        socket.disconnect();
+                        socket.connect();
+                        return;
+                    }
+
+                    hasNewMessage = false;
                     socket.send(pingData)
                     start();
                 }, pingInterval);
@@ -33,5 +42,8 @@ export function pingPlugin(socket: Socket) {
         } else {
             end();
         }
+    })
+    socket.subscribeMessage(() => {
+        hasNewMessage = true;
     })
 }
